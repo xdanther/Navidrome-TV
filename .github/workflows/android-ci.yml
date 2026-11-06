@@ -42,13 +42,65 @@ jobs:
           cache-read-only: false
 
       - name: Unit tests
-        run: gradle :app:testDebugUnitTest --no-daemon --stacktrace
+        run: |
+          set -o pipefail
+          gradle :app:testDebugUnitTest --no-daemon --stacktrace --console=plain 2>&1 | tee /tmp/unit-tests.log
 
       - name: Lint
-        run: gradle :app:lintDebug --no-daemon --stacktrace
+        if: success()
+        run: |
+          set -o pipefail
+          gradle :app:lintDebug --no-daemon --stacktrace --console=plain 2>&1 | tee /tmp/lint.log
 
       - name: Assemble debug APK
-        run: gradle :app:assembleDebug --no-daemon --stacktrace
+        if: success()
+        run: |
+          set -o pipefail
+          gradle :app:assembleDebug --no-daemon --stacktrace --console=plain 2>&1 | tee /tmp/assemble.log
+
+      # Logs are not readable without a GitHub session, so surface the actual
+      # compiler/test errors as annotations, which are visible on the run page.
+      - name: Report Gradle errors as annotations
+        if: failure()
+        run: |
+          python3 - <<'PY'
+          import os, re
+
+          LOGS = ["/tmp/unit-tests.log", "/tmp/lint.log", "/tmp/assemble.log"]
+          PATTERNS = re.compile(
+              r"^(e: |w: .*(Unresolved|error)|FAILURE:|> Task .*FAILED|"
+              r"\d+ tests? completed, .*failed|.*FAILED$|.*Unresolved reference|"
+              r"Could not (resolve|find|compile|create)|Execution failed|"
+              r"Caused by:|.*What went wrong)"
+          )
+
+          def esc(text):
+              return text.replace("%", "%25").replace("\r", "").replace("\n", "%0A")
+
+          found = 0
+          for path in LOGS:
+              if not os.path.exists(path):
+                  continue
+              name = os.path.basename(path)
+              with open(path, encoding="utf-8", errors="replace") as handle:
+                  lines = [line.rstrip() for line in handle]
+              for index, line in enumerate(lines):
+                  if not PATTERNS.match(line.strip()):
+                      continue
+                  context = line.strip()
+                  # Keep the following lines: Kotlin prints the file and caret under the error.
+                  for extra in lines[index + 1:index + 4]:
+                      extra = extra.rstrip()
+                      if extra.strip():
+                          context += "\n" + extra
+                  print(f"::error title={name}::{esc(context[:1800])}")
+                  found += 1
+                  if found >= 60:
+                      break
+              if found >= 60:
+                  break
+          print(f"::notice::Extracted {found} diagnostic line(s) from Gradle logs")
+          PY
 
       - name: Upload test and lint reports
         if: always()
@@ -58,6 +110,9 @@ jobs:
           path: |
             app/build/reports/**
             app/build/test-results/**
+            /tmp/unit-tests.log
+            /tmp/lint.log
+            /tmp/assemble.log
           if-no-files-found: ignore
 
       - name: Upload debug APK
