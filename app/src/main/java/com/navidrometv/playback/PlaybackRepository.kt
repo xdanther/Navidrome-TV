@@ -1,5 +1,3 @@
-@file:OptIn(androidx.media3.common.util.UnstableApi::class)
-
 package com.navidrometv.playback
 
 import android.content.ComponentName
@@ -77,6 +75,7 @@ data class PlaybackState(
  * screen, which is what keeps audio playing while the user browses.
  */
 @Singleton
+@androidx.media3.common.util.UnstableApi
 class PlaybackRepository @Inject constructor(
     @ApplicationContext private val context: Context,
     private val musicRepository: MusicRepository,
