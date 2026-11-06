@@ -104,6 +104,31 @@ jobs:
           print(f"::notice::Extracted {found} diagnostic line(s) from Gradle logs")
           PY
 
+      - name: Report lint findings as annotations
+        if: failure()
+        run: |
+          python3 - <<'PYEOF'
+          import glob, re
+
+          def esc(text):
+              return text.replace("%", "%25").replace("\r", "").replace("\n", "%0A")
+
+          paths = glob.glob("app/build/reports/lint-results-*.txt")
+          seen, count = set(), 0
+          for path in paths:
+              with open(path, encoding="utf-8", errors="replace") as handle:
+                  for line in handle:
+                      line = line.rstrip()
+                      if not re.search(r":\s*(Error|Warning):\s", line) or line in seen:
+                          continue
+                      seen.add(line)
+                      print(f"::error title={path}::{esc(line[:1800])}")
+                      count += 1
+                      if count >= 80:
+                          break
+          print(f"::notice::Emitted {count} lint finding(s)")
+          PYEOF
+
       - name: Upload test and lint reports
         if: always()
         uses: actions/upload-artifact@v4

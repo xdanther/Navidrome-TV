@@ -75,7 +75,6 @@ data class PlaybackState(
  * screen, which is what keeps audio playing while the user browses.
  */
 @Singleton
-@androidx.media3.common.util.UnstableApi
 class PlaybackRepository @Inject constructor(
     @ApplicationContext private val context: Context,
     private val musicRepository: MusicRepository,
@@ -189,6 +188,7 @@ class PlaybackRepository @Inject constructor(
             }
         }
 
+        @androidx.media3.common.util.UnstableApi
         override fun onTracksChanged(tracks: Tracks) {
             updateAudioInfo(tracks)
         }
