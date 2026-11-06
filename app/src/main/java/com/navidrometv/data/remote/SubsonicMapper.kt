@@ -19,9 +19,17 @@ import com.navidrometv.data.remote.dto.PlaylistDto
  * directly by unit tests.
  *
  * Cover art fallbacks use Navidrome's id conventions (`al-<albumId>`,
- * `ar-<artistId>`) because many servers omit `coverArt` on list payloads.
+ * `ar-<artistId>`) because many servers omit `coverArt` on list payloads. The
+ * prefix is only added when the id does not carry it already, so servers that
+ * return prefixed ids do not end up with unusable `al-al-…` artwork ids.
  */
 object SubsonicMapper {
+
+    private fun albumArtId(albumId: String): String =
+        if (albumId.startsWith("al-")) albumId else "al-$albumId"
+
+    private fun artistArtId(artistId: String): String =
+        if (artistId.startsWith("ar-")) artistId else "ar-$artistId"
 
     fun ChildDto.toTrack(): Track {
         val parentAlbumId = albumId ?: parent
@@ -38,7 +46,7 @@ object SubsonicMapper {
             year = year,
             genre = genre,
             isFavorite = !starred.isNullOrBlank(),
-            coverArtId = coverArt ?: parentAlbumId?.let { "al-$it" },
+            coverArtId = coverArt ?: parentAlbumId?.let(::albumArtId),
             suffix = suffix,
             bitRateKbps = bitRate,
             contentType = contentType,
@@ -55,7 +63,7 @@ object SubsonicMapper {
         genre = genre,
         trackCount = songCount,
         durationSeconds = duration,
-        coverArtId = coverArt ?: "al-$id",
+        coverArtId = coverArt ?: albumArtId(id),
         isFavorite = !starred.isNullOrBlank(),
         created = created,
     )
@@ -64,7 +72,7 @@ object SubsonicMapper {
         id = id,
         name = name.ifBlank { "Unknown artist" },
         albumCount = albumCount,
-        coverArtId = coverArt ?: "ar-$id",
+        coverArtId = coverArt ?: artistArtId(id),
         imageUrl = artistImageUrl,
         biography = biography,
     )

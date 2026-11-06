@@ -47,6 +47,15 @@ class SubsonicMapperTest {
     }
 
     @Test
+    fun `cover art fallback adds the prefix once for bare ids`() {
+        val album = AlbumId3Dto(id = "3f6d1c", name = "Drukqs").toAlbum()
+        assertEquals("al-3f6d1c", album.coverArtId)
+
+        val artist = ArtistId3Dto(id = "88aa10", name = "Aphex Twin").toArtist()
+        assertEquals("ar-88aa10", artist.coverArtId)
+    }
+
+    @Test
     fun `track falls back to parent id for album and artwork`() {
         val track = ChildDto(id = "7", title = "Unknown", parent = "album-7").toTrack()
 
@@ -70,7 +79,7 @@ class SubsonicMapperTest {
         assertEquals("Untitled album", album.name)
         assertEquals(13, album.trackCount)
         assertEquals(3200, album.durationSeconds)
-        assertEquals("al-al-3", album.coverArtId)
+        assertEquals("al-3", album.coverArtId)
     }
 
     @Test
@@ -79,7 +88,7 @@ class SubsonicMapperTest {
 
         assertEquals("ar-5", artist.id)
         assertEquals(4, artist.albumCount)
-        assertEquals("ar-ar-5", artist.coverArtId)
+        assertEquals("ar-5", artist.coverArtId)
     }
 
     @Test
