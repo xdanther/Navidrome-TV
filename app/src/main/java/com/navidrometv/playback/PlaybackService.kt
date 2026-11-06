@@ -178,6 +178,7 @@ class PlaybackService : MediaLibraryService() {
             return Futures.immediateFuture(LibraryResult.ofVoid(params))
         }
 
+        @androidx.media3.common.util.UnstableApi
         override fun onGetSearchResult(
             session: MediaLibrarySession,
             browser: MediaSession.ControllerInfo,
