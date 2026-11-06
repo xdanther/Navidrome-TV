@@ -245,6 +245,7 @@ class PlaybackRepository @Inject constructor(
         }
     }
 
+    @androidx.media3.common.util.UnstableApi
     private fun updateAudioInfo(tracks: Tracks) {
         val format = tracks.groups
             .asSequence()

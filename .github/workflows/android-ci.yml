@@ -68,10 +68,12 @@ jobs:
 
           LOGS = ["/tmp/unit-tests.log", "/tmp/lint.log", "/tmp/assemble.log"]
           PATTERNS = re.compile(
-              r"^(e: |w: .*(Unresolved|error)|FAILURE:|> Task .*FAILED|"
+              r"^(e: |w: |FAILURE:|> Task .*FAILED|"
               r"\d+ tests? completed, .*failed|.*FAILED$|.*Unresolved reference|"
+              r".*:\s*(Error|Warning):\s|"
               r"Could not (resolve|find|compile|create)|Execution failed|"
-              r"Caused by:|.*What went wrong)"
+              r"Caused by:|.*What went wrong|"
+              r"\d+ errors?, \d+ warnings?)"
           )
 
           def esc(text):
