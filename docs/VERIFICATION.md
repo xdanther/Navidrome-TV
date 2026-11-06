@@ -21,12 +21,15 @@ errors. Lint warnings do not fail the build; check the uploaded report.
 
 ## Last verified run
 
-Run [42297506307](https://github.com/xdanther/Navidrome-TV/actions/runs/42297506307)
-(2026-11-06, branch `freebuff/ce4e351aa72f4e6085fe8f89`, commit `1421ab1`) finished
-green: 28 unit tests passed, lint reported no errors, and the build produced an
-installable APK; both the APK and `reports` artifacts were uploaded. The pipeline
-now targets the release variant, so that run predates the switch from debug. That run covers the fixes listed in the changelog for the
-Subsonic envelope handling, cover-art fallbacks and the Media3 1.4.1 callbacks.
+Run [42300761466](https://github.com/xdanther/Navidrome-TV/actions/runs/42300761466)
+(2026-11-06, branch `freebuff/ce4e351aa72f4e6085fe8f89`, commit `7f38aa4`) is the
+first release-variant run and finished green: `testReleaseUnitTest` passed, no lint
+errors were reported, `assembleRelease` produced the R8-minified, resource-shrunk
+APK, and the `navidrome-tv-release-apk` artifact was uploaded.
+
+The earlier debug run [42297506307](https://github.com/xdanther/Navidrome-TV/actions/runs/42297506307)
+covered the compile fixes for the Subsonic envelope handling, cover-art fallbacks
+and the Media3 1.4.1 callbacks.
 
 ## Running the same checks locally
 
