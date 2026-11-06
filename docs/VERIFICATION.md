@@ -11,10 +11,21 @@ pull requests:
 4. Runs `:app:lintDebug`.
 5. Builds `:app:assembleDebug`.
 6. Uploads the debug APK, test reports and lint reports as workflow artifacts.
+7. On failure, republishes the Gradle and lint findings as workflow annotations, so
+   a failed build is readable without access to the raw job logs.
 
 A green run proves that the Kotlin sources compile against the pinned Android,
 Compose, Media3 and Hilt versions, that the unit tests pass, and that lint reports no
 errors. Lint warnings do not fail the build; check the uploaded report.
+
+## Last verified run
+
+Run [42297506307](https://github.com/xdanther/Navidrome-TV/actions/runs/42297506307)
+(2026-11-06, branch `freebuff/ce4e351aa72f4e6085fe8f89`, commit `1421ab1`) finished
+green: 28 unit tests passed, `lintDebug` reported no errors, `assembleDebug`
+produced the debug APK, and both the `navidrome-tv-debug-apk` and `reports`
+artifacts were uploaded. That run covers the fixes listed in the changelog for the
+Subsonic envelope handling, cover-art fallbacks and the Media3 1.4.1 callbacks.
 
 ## Running the same checks locally
 

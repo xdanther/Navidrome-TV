@@ -22,3 +22,16 @@ All notable changes to this project are documented here. The format follows
 - Room metadata cache with offline fallback, DataStore settings and cache controls.
 - JVM unit tests for auth, mapping, scrobble policy and formatting.
 - GitHub Actions workflow building, testing and linting the app.
+
+### Fixed
+
+- Subsonic responses are unwrapped once in `SubsonicService`, so every repository
+  call sees the payload instead of the envelope.
+- Cover-art fallbacks only add the `al-`/`ar-` prefix when the id does not carry it,
+  instead of producing unusable `al-al-…` artwork ids.
+- Media3 1.4.1 library callbacks match the real signatures (`onSearch` returns
+  `LibraryResult<Void>`, `onGetSearchResult` takes page and page size before
+  params), and the opt-in track-format calls are annotated for lint.
+- Onboarding exposes `canSubmit` on its state instead of an extension the screen
+  could not see.
+- CI republishes Gradle and lint findings as annotations so failures are readable.
