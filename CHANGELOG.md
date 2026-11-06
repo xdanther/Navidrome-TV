@@ -23,6 +23,12 @@ All notable changes to this project are documented here. The format follows
 - JVM unit tests for auth, mapping, scrobble policy and formatting.
 - GitHub Actions workflow building, testing and linting the app.
 
+### Changed
+
+- CI now builds, tests and lints the release variant only, and uploads the
+  R8-minified release APK. Release signing uses the debug key unless the
+  `RELEASE_*` environment variables supply a real keystore.
+
 ### Fixed
 
 - Subsonic responses are unwrapped once in `SubsonicService`, so every repository

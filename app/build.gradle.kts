@@ -20,6 +20,22 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    signingConfigs {
+        // Release signing is optional: CI and sideload builds fall back to the
+        // debug key so the APK is installable. Provide RELEASE_STORE_FILE,
+        // RELEASE_STORE_PASSWORD, RELEASE_KEY_ALIAS and RELEASE_KEY_PASSWORD to
+        // sign with a real upload key instead.
+        create("release") {
+            val storePath = System.getenv("RELEASE_STORE_FILE")
+            if (storePath != null) {
+                storeFile = file(storePath)
+                storePassword = System.getenv("RELEASE_STORE_PASSWORD")
+                keyAlias = System.getenv("RELEASE_KEY_ALIAS")
+                keyPassword = System.getenv("RELEASE_KEY_PASSWORD")
+            }
+        }
+    }
+
     buildTypes {
         debug {
             applicationIdSuffix = ".debug"
@@ -28,6 +44,11 @@ android {
         release {
             isMinifyEnabled = true
             isShrinkResources = true
+            signingConfig = if (System.getenv("RELEASE_STORE_FILE") != null) {
+                signingConfigs.getByName("release")
+            } else {
+                signingConfigs.getByName("debug")
+            }
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
     }

@@ -21,7 +21,7 @@ concurrency:
 
 jobs:
   build:
-    name: Compile, test and lint
+    name: Release build, test and lint
     runs-on: ubuntu-latest
     timeout-minutes: 40
 
@@ -44,19 +44,19 @@ jobs:
       - name: Unit tests
         run: |
           set -o pipefail
-          gradle :app:testDebugUnitTest --no-daemon --stacktrace --console=plain 2>&1 | tee /tmp/unit-tests.log
+          gradle :app:testReleaseUnitTest --no-daemon --stacktrace --console=plain 2>&1 | tee /tmp/unit-tests.log
 
       - name: Lint
         if: success()
         run: |
           set -o pipefail
-          gradle :app:lintDebug --no-daemon --stacktrace --console=plain 2>&1 | tee /tmp/lint.log
+          gradle :app:lintRelease --no-daemon --stacktrace --console=plain 2>&1 | tee /tmp/lint.log
 
-      - name: Assemble debug APK
+      - name: Assemble release APK
         if: success()
         run: |
           set -o pipefail
-          gradle :app:assembleDebug --no-daemon --stacktrace --console=plain 2>&1 | tee /tmp/assemble.log
+          gradle :app:assembleRelease --no-daemon --stacktrace --console=plain 2>&1 | tee /tmp/assemble.log
 
       # Logs are not readable without a GitHub session, so surface the actual
       # compiler/test errors as annotations, which are visible on the run page.
@@ -142,10 +142,10 @@ jobs:
             /tmp/assemble.log
           if-no-files-found: ignore
 
-      - name: Upload debug APK
+      - name: Upload release APK
         if: success()
         uses: actions/upload-artifact@v4
         with:
-          name: navidrome-tv-debug-apk
-          path: app/build/outputs/apk/debug/*.apk
-          if-no-files-found: warn
+          name: navidrome-tv-release-apk
+          path: app/build/outputs/apk/release/*.apk
+          if-no-files-found: error

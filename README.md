@@ -62,23 +62,29 @@ the Android SDK installed:
 
 ```bash
 # JDK 17 and ANDROID_HOME must be set
-gradle :app:assembleDebug          # debug APK
-gradle :app:testDebugUnitTest      # JVM unit tests
-gradle :app:lintDebug              # Android lint
+gradle :app:assembleRelease        # release APK (R8 minified and resource shrunk)
+gradle :app:testReleaseUnitTest    # JVM unit tests
+gradle :app:lintRelease            # Android lint
 ```
+
+The release build is signed with the debug key unless `RELEASE_STORE_FILE`,
+`RELEASE_STORE_PASSWORD`, `RELEASE_KEY_ALIAS` and `RELEASE_KEY_PASSWORD` are set in
+the environment, which makes the APK installable for sideloading but not suitable
+for store distribution.
 
 `gradlew` is intentionally not committed (no wrapper jar in this repository); CI and
 local builds use the Gradle 8.9 distribution directly.
 
-Continuous integration runs the same three tasks in
+Continuous integration runs the same three release tasks in
 [`.github/workflows/android-ci.yml`](.github/workflows/android-ci.yml) on every push
-and pull request, and uploads the APK, test reports and lint reports as artifacts.
+and pull request, and uploads the release APK, test reports and lint reports as
+artifacts.
 See [docs/VERIFICATION.md](docs/VERIFICATION.md) for exactly what CI proves and what
 it does not.
 
 ## First run
 
-1. Install the APK on the TV (`adb install -r app-debug.apk`).
+1. Install the APK on the TV (`adb install -r app-release.apk`).
 2. Enter the server address — `192.168.1.20:4533`, `music.example.com` or a full
    `https://` URL including a reverse-proxy sub-path.
 3. Sign in with a Navidrome username and password. Credentials are stored encrypted

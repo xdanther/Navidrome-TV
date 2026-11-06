@@ -7,10 +7,11 @@ pull requests:
 
 1. Sets up JDK 17 and the Android SDK.
 2. Installs Gradle 8.9 through `gradle/actions/setup-gradle`.
-3. Runs `:app:testDebugUnitTest` (JVM unit tests).
-4. Runs `:app:lintDebug`.
-5. Builds `:app:assembleDebug`.
-6. Uploads the debug APK, test reports and lint reports as workflow artifacts.
+3. Runs `:app:testReleaseUnitTest` (JVM unit tests).
+4. Runs `:app:lintRelease`.
+5. Builds `:app:assembleRelease`, which also runs R8 minification, resource
+   shrinking and `lintVitalRelease`.
+6. Uploads the release APK, test reports and lint reports as workflow artifacts.
 7. On failure, republishes the Gradle and lint findings as workflow annotations, so
    a failed build is readable without access to the raw job logs.
 
@@ -22,15 +23,15 @@ errors. Lint warnings do not fail the build; check the uploaded report.
 
 Run [42297506307](https://github.com/xdanther/Navidrome-TV/actions/runs/42297506307)
 (2026-11-06, branch `freebuff/ce4e351aa72f4e6085fe8f89`, commit `1421ab1`) finished
-green: 28 unit tests passed, `lintDebug` reported no errors, `assembleDebug`
-produced the debug APK, and both the `navidrome-tv-debug-apk` and `reports`
-artifacts were uploaded. That run covers the fixes listed in the changelog for the
+green: 28 unit tests passed, lint reported no errors, and the build produced an
+installable APK; both the APK and `reports` artifacts were uploaded. The pipeline
+now targets the release variant, so that run predates the switch from debug. That run covers the fixes listed in the changelog for the
 Subsonic envelope handling, cover-art fallbacks and the Media3 1.4.1 callbacks.
 
 ## Running the same checks locally
 
 ```bash
-gradle :app:testDebugUnitTest :app:lintDebug :app:assembleDebug
+gradle :app:testReleaseUnitTest :app:lintRelease :app:assembleRelease
 ```
 
 A JDK 17 and an Android SDK with platform 35 are required; the repository does not
