@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Navidrome servers frequently run on a home LAN behind plain HTTP (for example
+  http://192.168.1.10:4533). Because the server host is supplied by the user at
+  runtime, per-host pins cannot be declared statically, so cleartext is allowed.
+  HTTPS is always preferred and used automatically when the user enters an
+  https:// URL.
+-->
+<network-security-config>
+    <base-config cleartextTrafficPermitted="true">
+        <trust-anchors>
+            <certificates src="system" />
+        </trust-anchors>
+    </base-config>
+</network-security-config>
