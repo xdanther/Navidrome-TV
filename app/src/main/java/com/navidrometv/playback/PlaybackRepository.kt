@@ -255,7 +255,7 @@ class PlaybackRepository @Inject constructor(
             it.copy(
                 audioInfo = AudioPlaybackInfo(
                     mimeType = format.sampleMimeType,
-                    codec = format.codec,
+                    codec = format.codecs,
                     bitrateKbps = format.bitrate.takeIf { value -> value > 0 }?.div(1000),
                     sampleRateHz = format.sampleRate.takeIf { value -> value > 0 },
                     channelCount = format.channelCount.takeIf { value -> value > 0 },

@@ -25,7 +25,10 @@ data class OnboardingUiState(
     val error: AppError? = null,
     val handshake: ServerHandshake? = null,
     val busy: Boolean = false,
-)
+) {
+    val canSubmit: Boolean
+        get() = serverUrl.isNotBlank() && username.isNotBlank() && password.isNotEmpty()
+}
 
 /**
  * Username and password never leave the view model except through the repository,
@@ -90,6 +93,4 @@ class OnboardingViewModel @Inject constructor(
         }
     }
 
-    val OnboardingUiState.canSubmit: Boolean
-        get() = serverUrl.isNotBlank() && username.isNotBlank() && password.isNotEmpty()
 }

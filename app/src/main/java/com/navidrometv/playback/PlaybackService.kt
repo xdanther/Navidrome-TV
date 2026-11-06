@@ -162,7 +162,7 @@ class PlaybackService : MediaLibraryService() {
             browser: MediaSession.ControllerInfo,
             query: String,
             params: LibraryParams?,
-        ): ListenableFuture<LibraryResult<MediaItem>> {
+        ): ListenableFuture<LibraryResult<Void>> {
             lastQuery = query
             serviceScope.launch {
                 when (val result = musicRepository.search(query)) {
@@ -175,16 +175,16 @@ class PlaybackService : MediaLibraryService() {
                     }
                 }
             }
-            return Futures.immediateFuture(LibraryResult.ofItem(libraryRoot, params))
+            return Futures.immediateFuture(LibraryResult.ofVoid(params))
         }
 
         override fun onGetSearchResult(
             session: MediaLibrarySession,
             browser: MediaSession.ControllerInfo,
             query: String,
-            params: LibraryParams?,
             page: Int,
             pageSize: Int,
+            params: LibraryParams?,
         ): ListenableFuture<LibraryResult<ImmutableList<MediaItem>>> {
             if (!query.equals(lastQuery, ignoreCase = true)) {
                 return Futures.immediateFuture(
