@@ -31,6 +31,7 @@
 
         <activity
             android:name=".MainActivity"
+            android:windowSoftInputMode="adjustPan"
             android:configChanges="keyboard|keyboardHidden|navigation|screenSize|screenLayout|uiMode|smallestScreenSize"
             android:exported="true"
             android:launchMode="singleTask">

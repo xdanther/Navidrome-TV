@@ -1,9 +1,10 @@
 package com.navidrometv.presentation.screens.onboarding
 
-import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -23,10 +24,17 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -35,9 +43,6 @@ import com.navidrometv.core.designsystem.component.ActionButton
 import com.navidrometv.core.designsystem.theme.AppType
 import com.navidrometv.core.designsystem.theme.NavidromeColors
 import com.navidrometv.core.designsystem.theme.Space
-import com.navidrometv.presentation.components.TvKeyboard
-
-private enum class InputField { SERVER, USERNAME, PASSWORD }
 
 /**
  * Server onboarding. All three values are typed with the D-pad keyboard because a
@@ -49,7 +54,6 @@ fun OnboardingScreen(
     viewModel: OnboardingViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
-    var editing by remember { mutableStateOf<InputField?>(null) }
 
     Box(Modifier.fillMaxSize()) {
         Row(
@@ -95,23 +99,27 @@ fun OnboardingScreen(
             ) {
                 Text(text = "Server", style = AppType.title, color = NavidromeColors.OnSurface)
 
-                InputRow(
+                SetupField(
                     label = "Server address",
                     value = state.serverUrl,
                     placeholder = "http://192.168.1.10:4533",
-                    onClick = { editing = InputField.SERVER },
+                    keyboardType = KeyboardType.Uri,
+                    onValueChange = viewModel::onServerUrlChanged,
                 )
-                InputRow(
+                SetupField(
                     label = "Username",
                     value = state.username,
                     placeholder = "your Navidrome user",
-                    onClick = { editing = InputField.USERNAME },
+                    onValueChange = viewModel::onUsernameChanged,
                 )
-                InputRow(
+                SetupField(
                     label = "Password",
-                    value = if (state.password.isEmpty()) "" else "•".repeat(state.password.length),
+                    value = state.password,
                     placeholder = "password",
-                    onClick = { editing = InputField.PASSWORD },
+                    keyboardType = KeyboardType.Password,
+                    imeAction = ImeAction.Done,
+                    visualTransformation = PasswordVisualTransformation(),
+                    onValueChange = viewModel::onPasswordChanged,
                 )
 
                 Row(
@@ -165,38 +173,42 @@ fun OnboardingScreen(
             }
         }
 
-        editing?.let { field ->
-            KeyboardOverlay(
-                field = field,
-                value = when (field) {
-                    InputField.SERVER -> state.serverUrl
-                    InputField.USERNAME -> state.username
-                    InputField.PASSWORD -> state.password
-                },
-                onValueChange = { updated ->
-                    when (field) {
-                        InputField.SERVER -> viewModel.onServerUrlChanged(updated)
-                        InputField.USERNAME -> viewModel.onUsernameChanged(updated)
-                        InputField.PASSWORD -> viewModel.onPasswordChanged(updated)
-                    }
-                },
-                onDone = { editing = null },
-            )
-        }
     }
 }
 
+/**
+ * Text input that delegates typing to the device's own keyboard. On Android TV a
+ * focused editable field opens the system (Leanback) IME, which is what remote
+ * users expect; the app no longer draws a keyboard of its own during setup.
+ */
 @Composable
-private fun InputRow(
+private fun SetupField(
     label: String,
     value: String,
     placeholder: String,
-    onClick: () -> Unit,
+    onValueChange: (String) -> Unit,
+    keyboardType: KeyboardType = KeyboardType.Text,
+    imeAction: ImeAction = ImeAction.Next,
+    visualTransformation: VisualTransformation = VisualTransformation.None,
 ) {
+    val keyboard = LocalSoftwareKeyboardController.current
+    val focusManager = LocalFocusManager.current
     var focused by remember { mutableStateOf(false) }
+
     Column(Modifier.fillMaxWidth()) {
         Text(text = label, style = AppType.metadata, color = NavidromeColors.OnSurfaceMuted)
-        Box(
+        BasicTextField(
+            value = value,
+            onValueChange = onValueChange,
+            singleLine = true,
+            textStyle = AppType.body.copy(color = NavidromeColors.OnSurface),
+            cursorBrush = SolidColor(NavidromeColors.Accent),
+            visualTransformation = visualTransformation,
+            keyboardOptions = KeyboardOptions(keyboardType = keyboardType, imeAction = imeAction),
+            keyboardActions = KeyboardActions(
+                onNext = { focusManager.moveFocus(FocusDirection.Down) },
+                onDone = { keyboard?.hide() },
+            ),
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 6.dp)
@@ -206,74 +218,25 @@ private fun InputRow(
                     color = if (focused) Color.White else NavidromeColors.Border,
                     shape = RoundedCornerShape(14.dp),
                 )
-                .clickable(onClick = onClick)
-                .onFocusChanged { focused = it.isFocused }
-                .padding(horizontal = 16.dp, vertical = 14.dp),
-        ) {
-            Text(
-                text = value.ifEmpty { placeholder },
-                style = AppType.body,
-                color = if (value.isEmpty()) NavidromeColors.OnSurfaceMuted.copy(alpha = 0.55f) else NavidromeColors.OnSurface,
-            )
-        }
-    }
-}
-
-@Composable
-private fun KeyboardOverlay(
-    field: InputField,
-    value: String,
-    onValueChange: (String) -> Unit,
-    onDone: () -> Unit,
-) {
-    BackHandler(onBack = onDone)
-
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color(0xD9000000)),
-        contentAlignment = Alignment.Center,
-    ) {
-        Column(
-            modifier = Modifier
-                .width(760.dp)
-                .background(NavidromeColors.Surface, RoundedCornerShape(28.dp))
-                .padding(28.dp),
-            verticalArrangement = Arrangement.spacedBy(Space.md),
-        ) {
-            Text(
-                text = when (field) {
-                    InputField.SERVER -> "Server address"
-                    InputField.USERNAME -> "Username"
-                    InputField.PASSWORD -> "Password"
+                .padding(horizontal = 16.dp, vertical = 14.dp)
+                .onFocusChanged { focusState ->
+                    focused = focusState.isFocused
+                    // Ask for the system IME explicitly: a D-pad focus change does
+                    // not always raise it on TV.
+                    if (focusState.isFocused) keyboard?.show()
                 },
-                style = AppType.section,
-                color = NavidromeColors.OnSurface,
-            )
-            Box(
-                Modifier
-                    .fillMaxWidth()
-                    .background(NavidromeColors.Ink, RoundedCornerShape(12.dp))
-                    .padding(horizontal = 16.dp, vertical = 14.dp),
-            ) {
-                Text(
-                    text = if (value.isEmpty()) "…" else value,
-                    style = AppType.body,
-                    color = NavidromeColors.OnSurface,
-                )
-            }
-            TvKeyboard(
-                onCharacter = { character -> onValueChange(value + character) },
-                onBackspace = { onValueChange(value.dropLast(1)) },
-                onClear = { onValueChange("") },
-                onSearch = onDone,
-            )
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.End,
-            ) {
-                ActionButton(text = "Done", onClick = onDone)
-            }
-        }
+            decorationBox = { innerTextField ->
+                Box {
+                    if (value.isEmpty()) {
+                        Text(
+                            text = placeholder,
+                            style = AppType.body,
+                            color = NavidromeColors.OnSurfaceMuted.copy(alpha = 0.55f),
+                        )
+                    }
+                    innerTextField()
+                }
+            },
+        )
     }
 }
