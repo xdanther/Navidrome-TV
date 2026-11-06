@@ -45,8 +45,9 @@ import com.navidrometv.core.designsystem.theme.NavidromeColors
 import com.navidrometv.core.designsystem.theme.Space
 
 /**
- * Server onboarding. All three values are typed with the D-pad keyboard because a
- * television remote has no usable text field; nothing here requires a touchscreen.
+ * Server onboarding. The three values are entered through the device's own
+ * keyboard: on Android TV, focusing an editable field raises the system IME, so a
+ * remote (or a paired keyboard) is enough and nothing here needs a touchscreen.
  */
 @Composable
 fun OnboardingScreen(
@@ -172,7 +173,6 @@ fun OnboardingScreen(
                 }
             }
         }
-
     }
 }
 
