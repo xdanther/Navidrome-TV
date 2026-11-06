@@ -62,7 +62,7 @@ fun Throwable.toAppError(fallbackMessage: String = "Something went wrong"): AppE
             30, 20 -> ErrorKind.UNSUPPORTED
             else -> ErrorKind.SERVER
         },
-        message = message.ifBlank { fallbackMessage },
+        message = message.orEmpty().ifBlank { fallbackMessage },
         cause = this,
     )
     is SocketTimeoutException -> AppError(ErrorKind.TIMEOUT, "The server took too long to respond", this)

@@ -29,7 +29,9 @@ import kotlin.math.absoluteValue
  * provider lives at the app root because the URL depends on the active server
  * session, which the design system must not know about.
  */
-val LocalCoverArtUrl = staticCompositionLocalOf<(String?, Int) -> String?> { _, _ -> null }
+private val NoCoverArtUrl: (String?, Int) -> String? = { _, _ -> null }
+
+val LocalCoverArtUrl = staticCompositionLocalOf { NoCoverArtUrl }
 
 private val PlaceholderGradients = listOf(
     listOf(Color(0xFF2B1B4A), Color(0xFF0F0D1A)),

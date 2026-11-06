@@ -44,7 +44,6 @@ private val NavidromeDarkColorScheme = darkColorScheme(
     onSurface = NavidromeColors.OnSurface,
     surfaceVariant = NavidromeColors.SurfaceVariant,
     onSurfaceVariant = NavidromeColors.OnSurfaceMuted,
-    outline = NavidromeColors.Border,
     error = Color(0xFFFF6B6B),
     onError = Color.Black,
 )

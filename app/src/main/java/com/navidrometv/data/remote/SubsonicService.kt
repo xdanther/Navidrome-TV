@@ -6,6 +6,7 @@ import com.navidrometv.core.common.DataResult
 import com.navidrometv.core.common.ErrorKind
 import com.navidrometv.core.common.SubsonicException
 import com.navidrometv.core.common.toAppError
+import com.navidrometv.data.remote.dto.SubsonicEnvelope
 import com.navidrometv.data.remote.dto.SubsonicPayload
 import com.navidrometv.data.security.ServerCredentials
 import kotlinx.coroutines.CancellationException
@@ -35,7 +36,7 @@ class SubsonicService @Inject constructor(
     }
 
     suspend fun <T> withSession(
-        block: suspend (SubsonicSession) -> SubsonicPayload,
+        block: suspend (SubsonicSession) -> SubsonicEnvelope,
         map: (SubsonicPayload) -> T,
     ): DataResult<T> {
         val session = clientProvider.current()
@@ -48,7 +49,7 @@ class SubsonicService @Inject constructor(
     /** Runs a call with explicit credentials, used by onboarding's Test Connection. */
     suspend fun <T> withCredentials(
         credentials: ServerCredentials,
-        block: suspend (SubsonicSession) -> SubsonicPayload,
+        block: suspend (SubsonicSession) -> SubsonicEnvelope,
         map: (SubsonicPayload) -> T,
     ): DataResult<T> {
         val session = try {
@@ -63,11 +64,11 @@ class SubsonicService @Inject constructor(
 
     private suspend fun <T> execute(
         session: SubsonicSession,
-        block: suspend (SubsonicSession) -> SubsonicPayload,
+        block: suspend (SubsonicSession) -> SubsonicEnvelope,
         map: (SubsonicPayload) -> T,
     ): DataResult<T> = withContext(dispatchers.io) {
         try {
-            val payload = block(session)
+            val payload = block(session).payload
             if (!payload.isOk) {
                 val error = payload.error
                 throw SubsonicException(

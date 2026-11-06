@@ -1,6 +1,7 @@
 package com.navidrometv.data.remote
 
 import com.navidrometv.data.security.ServerCredentials
+import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import okhttp3.Interceptor
 import okhttp3.Response
 import java.security.MessageDigest
@@ -48,7 +49,7 @@ object SubsonicAuth {
         val normalized = normalizeBaseUrl(input)
         if (normalized.isEmpty()) return false
         return try {
-            val url = okhttp3.HttpUrl.Companion.toHttpUrlOrNull(normalized)
+            val url = normalized.toHttpUrlOrNull()
             url != null && url.host.isNotBlank()
         } catch (error: IllegalArgumentException) {
             false
