@@ -38,11 +38,12 @@ fun AlbumRow(
     onOpenAlbum: (String) -> Unit,
     modifier: Modifier = Modifier,
     subtitle: String? = null,
+    bleed: Boolean = false,
 ) {
     if (albums.isEmpty()) return
     Column(modifier = modifier.fillMaxWidth()) {
-        SectionHeader(title = title, subtitle = subtitle, modifier = Modifier.padding(bottom = Space.sm))
-        RowCarousel {
+        SectionHeader(title = title, subtitle = subtitle, modifier = rowHeaderModifier(bleed))
+        RowCarousel(bleed = bleed) {
             items(albums, key = { it.id }) { album ->
                 AlbumCard(album = album, onClick = { onOpenAlbum(album.id) })
             }
@@ -56,11 +57,12 @@ fun ArtistRow(
     artists: List<Artist>,
     onOpenArtist: (String) -> Unit,
     modifier: Modifier = Modifier,
+    bleed: Boolean = false,
 ) {
     if (artists.isEmpty()) return
     Column(modifier = modifier.fillMaxWidth()) {
-        SectionHeader(title = title, modifier = Modifier.padding(bottom = Space.sm))
-        RowCarousel {
+        SectionHeader(title = title, modifier = rowHeaderModifier(bleed))
+        RowCarousel(bleed = bleed) {
             items(artists, key = { it.id }) { artist ->
                 ArtistCard(artist = artist, onClick = { onOpenArtist(artist.id) })
             }
@@ -74,11 +76,12 @@ fun PlaylistRow(
     playlists: List<Playlist>,
     onOpenPlaylist: (String) -> Unit,
     modifier: Modifier = Modifier,
+    bleed: Boolean = false,
 ) {
     if (playlists.isEmpty()) return
     Column(modifier = modifier.fillMaxWidth()) {
-        SectionHeader(title = title, modifier = Modifier.padding(bottom = Space.sm))
-        RowCarousel {
+        SectionHeader(title = title, modifier = rowHeaderModifier(bleed))
+        RowCarousel(bleed = bleed) {
             items(playlists, key = { it.id }) { playlist ->
                 PlaylistCard(playlist = playlist, onClick = { onOpenPlaylist(playlist.id) })
             }
@@ -92,11 +95,12 @@ fun GenreRow(
     genres: List<Genre>,
     onOpenGenre: (String) -> Unit,
     modifier: Modifier = Modifier,
+    bleed: Boolean = false,
 ) {
     if (genres.isEmpty()) return
     Column(modifier = modifier.fillMaxWidth()) {
-        SectionHeader(title = title, modifier = Modifier.padding(bottom = Space.sm))
-        RowCarousel {
+        SectionHeader(title = title, modifier = rowHeaderModifier(bleed))
+        RowCarousel(bleed = bleed) {
             items(genres, key = { it.name }) { genre ->
                 GenreCard(
                     genre = genre,
@@ -108,16 +112,30 @@ fun GenreRow(
     }
 }
 
+/** Headers stay on the overscan-safe margin; the carousel may bleed past it. */
+private fun rowHeaderModifier(bleed: Boolean): Modifier =
+    if (bleed) {
+        Modifier.padding(start = Space.screenHorizontal, bottom = Space.sm)
+    } else {
+        Modifier.padding(bottom = Space.sm)
+    }
+
 /**
  * Shared carousel container: uniform 24dp gaps and a little vertical padding so a
- * focused card's ring and 1.06x scale are not clipped by the row bounds.
+ * focused card's ring has room. When [bleed] is set the row spans the full screen
+ * width and keeps the side margins as content padding instead, so covers run off
+ * the edge like a shelf on a TV instead of stopping inside a narrow column.
  */
 @Composable
-private fun RowCarousel(content: androidx.compose.foundation.lazy.LazyListScope.() -> Unit) {
+private fun RowCarousel(
+    bleed: Boolean = false,
+    content: androidx.compose.foundation.lazy.LazyListScope.() -> Unit,
+) {
+    val side = if (bleed) Space.screenHorizontal else 6.dp
     LazyRow(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(Space.lg),
-        contentPadding = PaddingValues(vertical = 18.dp, horizontal = 6.dp),
+        contentPadding = PaddingValues(start = side, end = side, top = 18.dp, bottom = 18.dp),
         content = content,
     )
 }

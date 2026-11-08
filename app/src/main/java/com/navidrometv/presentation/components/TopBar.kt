@@ -115,11 +115,12 @@ private fun NavTab(
         onClick = onClick,
         shape = pill,
         focusedScale = 1.04f,
+        ringWidth = 4.dp,
     ) { focused ->
         val fill by animateColorAsState(
             targetValue = when {
+                focused -> NavidromeColors.Ink
                 selected -> NavidromeColors.Surface
-                focused -> Color.White.copy(alpha = 0.55f)
                 else -> Color.Transparent
             },
             animationSpec = tween(durationMillis = 140),
@@ -128,9 +129,13 @@ private fun NavTab(
         Text(
             text = label,
             style = AppType.button.copy(
-                fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal,
+                fontWeight = if (selected || focused) FontWeight.SemiBold else FontWeight.Normal,
             ),
-            color = if (selected || focused) NavidromeColors.Ink else NavidromeColors.OnSurfaceMuted,
+            color = when {
+                focused -> Color.White
+                selected -> NavidromeColors.Ink
+                else -> NavidromeColors.OnSurfaceMuted
+            },
             modifier = Modifier
                 .background(fill, pill)
                 .padding(horizontal = 18.dp, vertical = 9.dp),
@@ -146,11 +151,11 @@ private fun NavIcon(
     onClick: () -> Unit,
 ) {
     val pill = RoundedCornerShape(percent = 50)
-    TvClickable(onClick = onClick, shape = pill, focusedScale = 1.04f) { focused ->
+    TvClickable(onClick = onClick, shape = pill, focusedScale = 1.04f, ringWidth = 4.dp) { focused ->
         val fill by animateColorAsState(
             targetValue = when {
+                focused -> NavidromeColors.Ink
                 selected -> NavidromeColors.Surface
-                focused -> Color.White.copy(alpha = 0.55f)
                 else -> Color.Transparent
             },
             animationSpec = tween(durationMillis = 140),
@@ -165,7 +170,11 @@ private fun NavIcon(
             Icon(
                 imageVector = icon,
                 contentDescription = contentDescription,
-                tint = if (selected) NavidromeColors.Ink else NavidromeColors.OnSurfaceMuted,
+                tint = when {
+                    focused -> Color.White
+                    selected -> NavidromeColors.Ink
+                    else -> NavidromeColors.OnSurfaceMuted
+                },
                 modifier = Modifier.size(20.dp),
             )
         }
@@ -175,13 +184,13 @@ private fun NavIcon(
 @Composable
 private fun NavTextChip(label: String, onClick: () -> Unit) {
     val pill = RoundedCornerShape(percent = 50)
-    TvClickable(onClick = onClick, shape = pill, focusedScale = 1.04f) { focused ->
+    TvClickable(onClick = onClick, shape = pill, focusedScale = 1.04f, ringWidth = 4.dp) { focused ->
         Text(
             text = label,
             style = AppType.overline,
-            color = if (focused) NavidromeColors.Ink else NavidromeColors.OnSurfaceMuted,
+            color = if (focused) Color.White else NavidromeColors.OnSurfaceMuted,
             modifier = Modifier
-                .background(if (focused) Color.White.copy(alpha = 0.65f) else Color.Transparent, pill)
+                .background(if (focused) NavidromeColors.Ink else Color.Transparent, pill)
                 .padding(horizontal = 12.dp, vertical = 12.dp),
         )
     }

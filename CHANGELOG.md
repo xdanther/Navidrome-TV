@@ -25,6 +25,17 @@ All notable changes to this project are documented here. The format follows
 
 ### Changed
 
+- Focus is now unmistakable on the light stage: a 6dp two-tone ring (white band,
+  dark edge) is drawn inside the element's own rounded shape, so nothing clips it
+  away, and a focused item also darkens to an ink pill in the navigation and chips.
+  Previously the ring was a thin 3dp outline outside the bounds, where scroll rows and
+  the navigation capsule cut it off.
+- The ambient backdrop no longer carries a white highlight: the gradient is fully
+  tinted from sand to sage to sky with warm and cool blooms, so the screen edges no
+  longer read as white margins.
+- Home carousels bleed to the screen edge while their shelf titles keep the
+  overscan margin, so covers run off the edge like a TV shelf instead of stopping
+  short inside a narrow column.
 - Replaced the dark charcoal chrome with a light, ambient stage: a soft
   sand-to-sky gradient behind every screen, translucent white glass for the
   navigation capsule and mini player, ink text with bold shelf titles, pastel

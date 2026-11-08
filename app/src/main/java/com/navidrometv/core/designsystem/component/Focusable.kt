@@ -84,23 +84,38 @@ fun TvClickable(
                 scaleY = scale
             }
             .zIndex(if (focused) 2f else 0f)
-            // Drawn before the clip so the ring sits outside the element's bounds
-            // rather than inset like a shadow.
+            // The ring is drawn *inside* the element's bounds: a white band with a
+            // dark outer edge, following the element's own rounded shape. Drawing it
+            // inset means no scroll container, capsule or card clip can swallow it,
+            // and the two-tone band reads on artwork (white) and on white chrome
+            // (dark edge) alike.
             .drawWithContent {
                 drawContent()
                 if (ring > 0.01f) {
-                    val stroke = ringWidth.toPx() * ring
-                    val radius = when (shape) {
-                        is RoundedCornerShape -> shape.topStart.toPx(size, this)
-                        else -> size.minDimension / 2f
+                    val band = minOf(ringWidth.toPx() * ring, size.minDimension / 2f)
+                    if (band > 0.5f) {
+                        val edge = band * 0.38f
+                        val baseRadius = when (shape) {
+                            is RoundedCornerShape -> shape.topStart.toPx(size, this)
+                            else -> size.minDimension / 2f
+                        }
+                        val center = band / 2f
+                        drawRoundRect(
+                            color = Color.White.copy(alpha = 0.98f * ring),
+                            topLeft = Offset(center, center),
+                            size = Size(size.width - band, size.height - band),
+                            cornerRadius = CornerRadius((baseRadius - center).coerceAtLeast(0f)),
+                            style = Stroke(width = band),
+                        )
+                        val edgeCenter = edge / 2f
+                        drawRoundRect(
+                            color = ringColor.copy(alpha = ring),
+                            topLeft = Offset(edgeCenter, edgeCenter),
+                            size = Size(size.width - edge, size.height - edge),
+                            cornerRadius = CornerRadius((baseRadius - edgeCenter).coerceAtLeast(0f)),
+                            style = Stroke(width = edge),
+                        )
                     }
-                    drawRoundRect(
-                        color = ringColor.copy(alpha = ring),
-                        topLeft = Offset(-stroke / 2f, -stroke / 2f),
-                        size = Size(size.width + stroke, size.height + stroke),
-                        cornerRadius = CornerRadius(radius + stroke / 2f),
-                        style = Stroke(width = stroke),
-                    )
                 }
             }
             .clip(shape)
@@ -289,6 +304,7 @@ fun FilterChip(
         onClick = onClick,
         modifier = modifier,
         shape = pill,
+        ringWidth = 4.dp,
     ) { focused ->
         Box(
             modifier = Modifier

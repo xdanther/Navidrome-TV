@@ -86,15 +86,13 @@ private fun HomeContent(
         state = listState,
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(
-            start = Space.screenHorizontal,
-            end = Space.screenHorizontal,
             top = Space.md,
             bottom = Space.contentBottomWithPlayer,
         ),
         verticalArrangement = Arrangement.spacedBy(Space.lg),
     ) {
         item(key = "greeting") {
-            Column {
+            Column(modifier = Modifier.padding(horizontal = Space.screenHorizontal)) {
                 Text(
                     text = greeting(),
                     style = AppType.title,
@@ -110,13 +108,13 @@ private fun HomeContent(
 
         if (state.recentlyPlayed.isNotEmpty()) {
             item(key = "recent") {
-                AlbumRow(title = "Recently Played", albums = state.recentlyPlayed, onOpenAlbum = onOpenAlbum)
+                AlbumRow(title = "Recently Played", albums = state.recentlyPlayed, onOpenAlbum = onOpenAlbum, bleed = true)
             }
         }
 
         if (state.mostPlayed.isNotEmpty()) {
             item(key = "most-played") {
-                Column {
+                Column(modifier = Modifier.padding(horizontal = Space.screenHorizontal)) {
                     SectionHeader(title = "Most Played", subtitle = "from this device")
                     Column(Modifier.padding(top = Space.sm)) {
                         state.mostPlayed.forEachIndexed { index, track ->
@@ -137,25 +135,25 @@ private fun HomeContent(
 
         if (state.recentlyAdded.isNotEmpty()) {
             item(key = "newest") {
-                AlbumRow(title = "Recently Added", albums = state.recentlyAdded, onOpenAlbum = onOpenAlbum)
+                AlbumRow(title = "Recently Added", albums = state.recentlyAdded, onOpenAlbum = onOpenAlbum, bleed = true)
             }
         }
 
         if (state.playedArtists.isNotEmpty()) {
             item(key = "artists") {
-                ArtistRow(title = "Artists You Play", artists = state.playedArtists, onOpenArtist = onOpenArtist)
+                ArtistRow(title = "Artists You Play", artists = state.playedArtists, onOpenArtist = onOpenArtist, bleed = true)
             }
         }
 
         if (state.favoriteAlbums.isNotEmpty()) {
             item(key = "favorites") {
-                AlbumRow(title = "Favorite Albums", albums = state.favoriteAlbums, onOpenAlbum = onOpenAlbum)
+                AlbumRow(title = "Favorite Albums", albums = state.favoriteAlbums, onOpenAlbum = onOpenAlbum, bleed = true)
             }
         }
 
         if (state.favoriteTracks.isNotEmpty()) {
             item(key = "favorite-tracks") {
-                Column {
+                Column(modifier = Modifier.padding(horizontal = Space.screenHorizontal)) {
                     SectionHeader(title = "Favorite Songs")
                     Column(Modifier.padding(top = Space.sm)) {
                         state.favoriteTracks.take(6).forEachIndexed { index, track ->
@@ -176,31 +174,36 @@ private fun HomeContent(
 
         if (state.playlists.isNotEmpty()) {
             item(key = "playlists") {
-                PlaylistRow(title = "Playlists", playlists = state.playlists, onOpenPlaylist = onOpenPlaylist)
+                PlaylistRow(title = "Playlists", playlists = state.playlists, onOpenPlaylist = onOpenPlaylist, bleed = true)
             }
         }
 
         if (state.genres.isNotEmpty()) {
             item(key = "genres") {
-                GenreRow(title = "Genres", genres = state.genres, onOpenGenre = onOpenGenre)
+                GenreRow(title = "Genres", genres = state.genres, onOpenGenre = onOpenGenre, bleed = true)
             }
         }
 
         if (state.frequentlyPlayed.isNotEmpty()) {
             item(key = "frequent") {
-                AlbumRow(title = "On Repeat", albums = state.frequentlyPlayed, onOpenAlbum = onOpenAlbum)
+                AlbumRow(title = "On Repeat", albums = state.frequentlyPlayed, onOpenAlbum = onOpenAlbum, bleed = true)
             }
         }
 
         if (state.discover.isNotEmpty()) {
             item(key = "discover") {
-                AlbumRow(title = "Discover", albums = state.discover, onOpenAlbum = onOpenAlbum)
+                AlbumRow(title = "Discover", albums = state.discover, onOpenAlbum = onOpenAlbum, bleed = true)
             }
         }
 
         if (state.isEmpty) {
             item(key = "empty") {
-                Column(Modifier.height(240.dp), verticalArrangement = Arrangement.Center) {
+                Column(
+                    Modifier
+                        .padding(horizontal = Space.screenHorizontal)
+                        .height(240.dp),
+                    verticalArrangement = Arrangement.Center,
+                ) {
                     Text(
                         text = "Your library looks empty",
                         style = AppType.title,
@@ -222,7 +225,7 @@ private fun HomeContent(
         }
 
         item(key = "footer") {
-            Column(Modifier.fillMaxWidth()) {
+            Column(Modifier.fillMaxWidth().padding(horizontal = Space.screenHorizontal)) {
                 Text(
                     text = "Sections come from your server and this device's play history.",
                     style = AppType.cardSubtitle,

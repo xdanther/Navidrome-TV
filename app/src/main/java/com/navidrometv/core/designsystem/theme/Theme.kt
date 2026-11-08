@@ -50,11 +50,13 @@ object NavidromeColors {
     val Glass = Color(0xF2FFFFFF)
     val GlassSubtle = Color(0x8CFFFFFF)
 
-    // Backdrop gradient stops (warm sand, sage, sky, mist).
-    val AmbientSand = Color(0xFFF7EAD6)
-    val AmbientSage = Color(0xFFE6EFE8)
-    val AmbientSky = Color(0xFFDBE7F4)
-    val AmbientMist = Color(0xFFEDF1F7)
+    // Backdrop gradient stops (warm sand, cream, sage, sky). Every stop carries a
+    // visible tint: a near-white stop reads as a white margin at the screen edges.
+    val AmbientSand = Color(0xFFF2E3CB)
+    val AmbientCream = Color(0xFFF9F2E6)
+    val AmbientSage = Color(0xFFDCEADF)
+    val AmbientSky = Color(0xFFD6E3F1)
+    val AmbientMist = Color(0xFFE4EBF4)
 }
 
 private val NavidromeLightColorScheme = lightColorScheme(
@@ -197,16 +199,17 @@ object Dimens {
     val cardCorner = 12.dp
     val panelCorner = 16.dp
     val pillCorner = 100.dp
-    val focusBorderWidth = 3.dp
+    val focusBorderWidth = 6.dp
     val cardElevation = 10.dp
     val floatingElevation = 20.dp
     const val FOCUS_SCALE = 1.10f
 }
 
 /**
- * The ambient backdrop: a diagonal wash from warm sand through sage into cool sky,
- * with a soft highlight near the top. It is drawn once behind the whole app so every
- * screen shares the same light stage and cards read as glass on top of it.
+ * The ambient backdrop: one diagonal wash, warm sand at the top-left into cream,
+ * sage and cool sky at the bottom-right, plus two soft colour blooms. It is drawn
+ * once behind the whole app and covers the full canvas edge to edge, so no screen
+ * ever shows a bare white margin around the content.
  */
 @Composable
 fun AmbientBackdrop(modifier: Modifier = Modifier) {
@@ -215,22 +218,34 @@ fun AmbientBackdrop(modifier: Modifier = Modifier) {
             brush = Brush.linearGradient(
                 colors = listOf(
                     NavidromeColors.AmbientSand,
+                    NavidromeColors.AmbientCream,
                     NavidromeColors.AmbientSage,
                     NavidromeColors.AmbientSky,
-                    NavidromeColors.AmbientMist,
                 ),
                 start = Offset(0f, 0f),
-                end = Offset(size.width, size.height * 1.2f),
+                end = Offset(size.width, size.height),
             ),
         )
+        // Warm bloom in the lower-left corner.
         drawRect(
             brush = Brush.radialGradient(
                 colors = listOf(
-                    Color.White.copy(alpha = 0.55f),
+                    NavidromeColors.AmbientSand.copy(alpha = 0.75f),
                     Color.Transparent,
                 ),
-                center = Offset(size.width * 0.62f, size.height * 0.02f),
-                radius = size.width * 0.8f,
+                center = Offset(size.width * 0.06f, size.height * 1.02f),
+                radius = size.width * 0.7f,
+            ),
+        )
+        // Cool bloom in the upper-right corner.
+        drawRect(
+            brush = Brush.radialGradient(
+                colors = listOf(
+                    NavidromeColors.AmbientSky.copy(alpha = 0.8f),
+                    Color.Transparent,
+                ),
+                center = Offset(size.width * 0.95f, size.height * -0.02f),
+                radius = size.width * 0.65f,
             ),
         )
     }
