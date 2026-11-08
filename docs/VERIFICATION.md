@@ -21,15 +21,20 @@ errors. Lint warnings do not fail the build; check the uploaded report.
 
 ## Last verified run
 
-Run [42300761466](https://github.com/xdanther/Navidrome-TV/actions/runs/42300761466)
-(2026-11-06, branch `freebuff/ce4e351aa72f4e6085fe8f89`, commit `7f38aa4`) is the
-first release-variant run and finished green: `testReleaseUnitTest` passed, no lint
-errors were reported, `assembleRelease` produced the R8-minified, resource-shrunk
-APK, and the `navidrome-tv-release-apk` artifact was uploaded.
+Run [42494393139](https://github.com/xdanther/Navidrome-TV/actions/runs/42494393139)
+(2026-11-06, branch `freebuff/ce4e351aa72f4e6085fe8f89`, commit `8d873e8`) finished
+green after the 10-foot redesign: `testReleaseUnitTest` passed, `lintRelease` reported
+no errors, and `assembleRelease` produced the R8-minified APK.
 
-The earlier debug run [42297506307](https://github.com/xdanther/Navidrome-TV/actions/runs/42297506307)
-covered the compile fixes for the Subsonic envelope handling, cover-art fallbacks
-and the Media3 1.4.1 callbacks.
+That run proves the redesigned composables compile against Compose 1.7 and tv-material
+1.0.0 and that lint accepts them. It does **not** prove anything about how the result
+looks or feels: focus contrast, the navigation collapse, artwork proportions, lyric
+layout and background stability all need a device or emulator to assess.
+
+Earlier release run [42300761466](https://github.com/xdanther/Navidrome-TV/actions/runs/42300761466)
+(commit `7f38aa4`) first exercised the release variant, and debug run
+[42297506307](https://github.com/xdanther/Navidrome-TV/actions/runs/42297506307)
+covered the Subsonic envelope, cover-art fallback and Media3 callback fixes.
 
 ## Running the same checks locally
 
