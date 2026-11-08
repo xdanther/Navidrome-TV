@@ -98,7 +98,7 @@ fun BrowseScreen(
                     SectionHeader(title = "Decades")
                     LazyRow(
                         modifier = Modifier.padding(top = Space.md),
-                        horizontalArrangement = Arrangement.spacedBy(18.dp),
+                        horizontalArrangement = Arrangement.spacedBy(26.dp),
                     ) {
                         items(DefaultDecades.size) { index ->
                             val decadeItem = DefaultDecades[index]
@@ -176,12 +176,12 @@ private fun DecadeContent(
             )
             else -> BoxWithConstraints(Modifier.fillMaxSize().padding(top = Space.md)) {
                 val columns = 6
-                val spacing = 18.dp
+                val spacing = 30.dp
                 val cardWidth = (maxWidth - spacing * (columns - 1)) / columns
                 LazyVerticalGrid(
                     columns = GridCells.Fixed(columns),
                     horizontalArrangement = Arrangement.spacedBy(spacing),
-                    verticalArrangement = Arrangement.spacedBy(22.dp),
+                    verticalArrangement = Arrangement.spacedBy(34.dp),
                     contentPadding = PaddingValues(bottom = Space.contentBottomWithPlayer),
                 ) {
                     items(state.decadeAlbums, key = { it.id }) { album ->

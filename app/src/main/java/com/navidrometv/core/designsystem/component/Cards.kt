@@ -1,7 +1,5 @@
 package com.navidrometv.core.designsystem.component
 
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -13,7 +11,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -60,20 +57,6 @@ fun AlbumCard(
                     .aspectRatio(1f),
                 shape = RoundedCornerShape(Dimens.cardCorner),
             )
-            // A focused cover lifts a little in brightness: on very dark artwork the
-            // outline alone would be the only cue.
-            val lift by animateFloatAsState(
-                targetValue = if (it) 1f else 0f,
-                animationSpec = tween(durationMillis = 150),
-                label = "album-lift",
-            )
-            if (lift > 0.01f) {
-                Box(
-                    Modifier
-                        .matchParentSize()
-                        .background(Color.White.copy(alpha = 0.08f * lift)),
-                )
-            }
         }
         Text(
             text = album.name,

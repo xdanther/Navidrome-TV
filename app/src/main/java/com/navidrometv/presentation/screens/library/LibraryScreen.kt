@@ -231,12 +231,12 @@ private fun AlbumGrid(
     columns: Int,
 ) {
     BoxWithConstraints(Modifier.fillMaxSize()) {
-        val spacing = 18.dp
+        val spacing = 30.dp
         val cardWidth = (maxWidth - spacing * (columns - 1)) / columns
         LazyVerticalGrid(
             columns = GridCells.Fixed(columns),
             horizontalArrangement = Arrangement.spacedBy(spacing),
-            verticalArrangement = Arrangement.spacedBy(22.dp),
+            verticalArrangement = Arrangement.spacedBy(34.dp),
             contentPadding = PaddingValues(bottom = Space.contentBottomWithPlayer),
         ) {
             items(albums, key = { it.id }) { album ->
@@ -258,12 +258,12 @@ private fun GridOfArtists(
 ) {
     BoxWithConstraints(Modifier.fillMaxSize()) {
         val columns = 6
-        val spacing = 18.dp
+        val spacing = 30.dp
         val cardWidth = (maxWidth - spacing * (columns - 1)) / columns
         LazyVerticalGrid(
             columns = GridCells.Fixed(columns),
             horizontalArrangement = Arrangement.spacedBy(spacing),
-            verticalArrangement = Arrangement.spacedBy(22.dp),
+            verticalArrangement = Arrangement.spacedBy(34.dp),
             contentPadding = PaddingValues(bottom = Space.contentBottomWithPlayer),
         ) {
             items(artists, key = { it.id }) { artist ->
@@ -280,8 +280,8 @@ private fun GenreGrid(
 ) {
     LazyVerticalGrid(
         columns = GridCells.Fixed(3),
-        horizontalArrangement = Arrangement.spacedBy(18.dp),
-        verticalArrangement = Arrangement.spacedBy(18.dp),
+        horizontalArrangement = Arrangement.spacedBy(26.dp),
+        verticalArrangement = Arrangement.spacedBy(26.dp),
         contentPadding = PaddingValues(bottom = Space.contentBottomWithPlayer),
     ) {
         items(genres, key = { it.name }) { genre ->

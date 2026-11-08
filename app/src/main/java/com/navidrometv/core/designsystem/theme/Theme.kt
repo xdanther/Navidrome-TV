@@ -177,7 +177,7 @@ object Dimens {
     val panelCorner = 16.dp
     val pillCorner = 100.dp
     val focusBorderWidth = 2.dp
-    const val FOCUS_SCALE = 1.05f
+    const val FOCUS_SCALE = 1.10f
 }
 
 @Composable

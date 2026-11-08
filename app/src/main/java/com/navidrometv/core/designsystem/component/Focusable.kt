@@ -25,10 +25,15 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.drawscope.drawOutline
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.translate
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -56,7 +61,7 @@ fun TvClickable(
     enabled: Boolean = true,
     focusedScale: Float = Dimens.FOCUS_SCALE,
     shape: Shape = RoundedCornerShape(Dimens.cardCorner),
-    ringWidth: Dp = Dimens.focusBorderWidth,
+    ringWidth: Dp = 3.dp,
     onFocusChanged: ((Boolean) -> Unit)? = null,
     content: @Composable BoxScope.(focused: Boolean) -> Unit,
 ) {
@@ -78,6 +83,25 @@ fun TvClickable(
                 scaleY = scale
             }
             .zIndex(if (focused) 2f else 0f)
+            // Drawn before the clip so the ring sits outside the element's bounds
+            // rather than inset like a shadow.
+            .drawWithContent {
+                drawContent()
+                if (ring > 0.01f) {
+                    val stroke = ringWidth.toPx() * ring
+                    val outline = shape.createOutline(
+                        Size(size.width + stroke, size.height + stroke),
+                        layoutDirection,
+                        this,
+                    )
+                    drawContext.canvas.translate(-stroke / 2f, -stroke / 2f)
+                    drawOutline(
+                        outline = outline,
+                        color = NavidromeColors.Focus.copy(alpha = ring),
+                        style = Stroke(width = stroke),
+                    )
+                }
+            }
             .clip(shape)
             .clickable(enabled = enabled, onClick = onClick)
             .onFocusChanged {
@@ -88,17 +112,6 @@ fun TvClickable(
             },
     ) {
         content(focused)
-        if (ring > 0.01f) {
-            Box(
-                modifier = Modifier
-                    .matchParentSize()
-                    .border(
-                        width = ringWidth * ring,
-                        color = NavidromeColors.Focus.copy(alpha = ring),
-                        shape = shape,
-                    ),
-            )
-        }
     }
 }
 

@@ -117,7 +117,7 @@ private fun RowCarousel(content: androidx.compose.foundation.lazy.LazyListScope.
     LazyRow(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(Space.lg),
-        contentPadding = PaddingValues(vertical = 6.dp, horizontal = 4.dp),
+        contentPadding = PaddingValues(vertical = 18.dp, horizontal = 6.dp),
         content = content,
     )
 }

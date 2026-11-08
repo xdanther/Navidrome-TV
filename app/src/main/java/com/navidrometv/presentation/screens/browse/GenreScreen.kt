@@ -103,12 +103,12 @@ fun GenreScreen(
             )
             else -> BoxWithConstraints(Modifier.fillMaxSize().padding(top = Space.md)) {
                 val columns = 6
-                val spacing = 18.dp
+                val spacing = 30.dp
                 val cardWidth = (maxWidth - spacing * (columns - 1)) / columns
                 LazyVerticalGrid(
                     columns = GridCells.Fixed(columns),
                     horizontalArrangement = Arrangement.spacedBy(spacing),
-                    verticalArrangement = Arrangement.spacedBy(22.dp),
+                    verticalArrangement = Arrangement.spacedBy(34.dp),
                     contentPadding = PaddingValues(bottom = Space.contentBottomWithPlayer),
                 ) {
                     items(state.albums, key = { it.id }) { album ->

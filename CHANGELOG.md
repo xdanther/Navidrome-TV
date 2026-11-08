@@ -25,6 +25,13 @@ All notable changes to this project are documented here. The format follows
 
 ### Changed
 
+### Changed
+
+- Focus now grows the element to 1.10x (the top of the TV guidance range) and draws
+  its outline outside the element, instead of a 1.05x scale with an inset outline
+  that read like a shadow. The translucent white veil over focused covers is gone and
+  grid gutters were widened so scaled cards do not collide.
+
 - Reworked the visual language to the Android TV design guidance and retired the
   purple/red art direction: neutral charcoal Material surfaces, one Google-blue
   accent reserved for state, Roboto TV type scale, 48dp/27dp overscan-safe margins,
