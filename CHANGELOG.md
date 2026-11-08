@@ -55,6 +55,11 @@ All notable changes to this project are documented here. The format follows
 
 ### Fixed
 
+- The album screen overflowed a 960x540dp television layout: a fixed 360dp cover
+  column pushed the title, artist and metadata past the bottom edge, and the
+  five-button action row was squeezed into a tall empty pill. The cover now sizes
+  itself from the available height, album actions are two labelled buttons plus icon
+  controls, and the track list scrolls with room for the mini player.
 - Release APKs no longer change signing certificate on every CI run, which made
   Android refuse an update over an already installed build. CI now restores a
   persisted keystore, and the pipeline fails if the APK's certificate does not match
