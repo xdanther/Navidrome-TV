@@ -38,6 +38,33 @@ Earlier runs: [42494393139](https://github.com/xdanther/Navidrome-TV/actions/run
 [42297506307](https://github.com/xdanther/Navidrome-TV/actions/runs/42297506307)
 covered the Subsonic envelope, cover-art fallback and Media3 callback fixes.
 
+## Release signing
+
+Every CI run used to sign the release APK with a freshly generated debug keystore,
+so the certificate changed on each build and Android rejected installing an update
+over an existing copy.
+
+`android-ci.yml` now prepares a keystore before the build:
+
+1. `Restore signing key` restores the `.signing/` directory from the Actions cache.
+2. `Prepare release signing` writes a keystore from `RELEASE_KEYSTORE_BASE64` if that
+   secret exists, otherwise reuses the restored file, otherwise generates one with
+   `keytool` and caches it after the job.
+3. `Assemble release APK` receives `RELEASE_STORE_FILE`, the password and the alias,
+   so `app/build.gradle.kts` signs the release variant with that key.
+4. `Verify APK signature` compares the keystore's certificate SHA-256 with the APK's
+   and fails the build if they differ, so a silent re-signing cannot ship.
+
+Observed on run [42496984812](https://github.com/xdanther/Navidrome-TV/actions/runs/42496984812):
+the key was generated on the first run, its certificate SHA-256 is
+`acfab1170c8fd69fac85566fdcd7e96cfc39a6a00664e2f42b226c377ab851a4`, and
+`apksigner` reported the same digest for the APK. Later runs restore that key and
+must report the identical digest.
+
+Limits: the Actions cache is branch-scoped and can be evicted, and a merge to `main`
+starts from that branch's own cache. Configure the `RELEASE_*` repository secrets for
+a key that never changes; the cache is a zero-setup default, not a guarantee.
+
 ## Running the same checks locally
 
 ```bash
