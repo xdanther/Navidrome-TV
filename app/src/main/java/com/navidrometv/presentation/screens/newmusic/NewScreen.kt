@@ -51,15 +51,13 @@ fun NewScreen(
         else -> LazyColumn(
             modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(
-                start = Space.screenHorizontal,
-                end = Space.screenHorizontal,
                 top = Space.md,
                 bottom = Space.contentBottomWithPlayer,
             ),
             verticalArrangement = Arrangement.spacedBy(Space.xl),
         ) {
             item(key = "header") {
-                Column {
+                Column(Modifier.padding(horizontal = Space.screenHorizontal)) {
                     Text(text = "New", style = AppType.title, color = NavidromeColors.OnSurface)
                     Row(
                         horizontalArrangement = Arrangement.spacedBy(Space.xs),
@@ -77,7 +75,12 @@ fun NewScreen(
             }
 
             item(key = "albums") {
-                AlbumRow(title = "Recently Added Albums", albums = state.albums, onOpenAlbum = onOpenAlbum)
+                AlbumRow(
+                    title = "Recently Added Albums",
+                    albums = state.albums,
+                    onOpenAlbum = onOpenAlbum,
+                    bleed = true,
+                )
             }
 
             if (state.artists.isNotEmpty()) {
@@ -86,13 +89,14 @@ fun NewScreen(
                         title = "Artists with New Releases",
                         artists = state.artists,
                         onOpenArtist = onOpenArtist,
+                        bleed = true,
                     )
                 }
             }
 
             if (state.tracks.isNotEmpty()) {
                 item(key = "tracks") {
-                    Column {
+                    Column(Modifier.padding(horizontal = Space.screenHorizontal)) {
                         Text(
                             text = "New Songs",
                             style = AppType.section,

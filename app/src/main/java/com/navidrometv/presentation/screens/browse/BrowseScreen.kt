@@ -78,27 +78,41 @@ fun BrowseScreen(
         else -> LazyColumn(
             modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(
-                start = Space.screenHorizontal,
-                end = Space.screenHorizontal,
                 top = Space.md,
                 bottom = Space.contentBottomWithPlayer,
             ),
             verticalArrangement = Arrangement.spacedBy(Space.xl),
         ) {
             item(key = "title") {
-                Text(text = "Browse", style = AppType.title, color = NavidromeColors.OnSurface)
+                Text(
+                    text = "Browse",
+                    style = AppType.title,
+                    color = NavidromeColors.OnSurface,
+                    modifier = Modifier.padding(horizontal = Space.screenHorizontal),
+                )
             }
             if (state.genres.isNotEmpty()) {
                 item(key = "genres") {
-                    GenreRow(title = "Genres", genres = state.genres, onOpenGenre = onOpenGenre)
+                    GenreRow(
+                        title = "Genres",
+                        genres = state.genres,
+                        onOpenGenre = onOpenGenre,
+                        bleed = true,
+                    )
                 }
             }
             item(key = "decades") {
                 Column {
-                    SectionHeader(title = "Decades")
+                    SectionHeader(
+                        title = "Decades",
+                        modifier = Modifier.padding(start = Space.screenHorizontal),
+                    )
                     LazyRow(
-                        modifier = Modifier.padding(top = Space.md),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = Space.md),
                         horizontalArrangement = Arrangement.spacedBy(26.dp),
+                        contentPadding = PaddingValues(horizontal = Space.screenHorizontal),
                     ) {
                         items(DefaultDecades.size) { index ->
                             val decadeItem = DefaultDecades[index]
@@ -109,17 +123,32 @@ fun BrowseScreen(
             }
             if (state.playlists.isNotEmpty()) {
                 item(key = "playlists") {
-                    PlaylistRow(title = "Playlists", playlists = state.playlists, onOpenPlaylist = onOpenPlaylist)
+                    PlaylistRow(
+                        title = "Playlists",
+                        playlists = state.playlists,
+                        onOpenPlaylist = onOpenPlaylist,
+                        bleed = true,
+                    )
                 }
             }
             if (state.artists.isNotEmpty()) {
                 item(key = "artists") {
-                    ArtistRow(title = "Artists", artists = state.artists, onOpenArtist = onOpenArtist)
+                    ArtistRow(
+                        title = "Artists",
+                        artists = state.artists,
+                        onOpenArtist = onOpenArtist,
+                        bleed = true,
+                    )
                 }
             }
             if (state.discover.isNotEmpty()) {
                 item(key = "discover") {
-                    AlbumRow(title = "Random Selection", albums = state.discover, onOpenAlbum = onOpenAlbum)
+                    AlbumRow(
+                        title = "Random Selection",
+                        albums = state.discover,
+                        onOpenAlbum = onOpenAlbum,
+                        bleed = true,
+                    )
                 }
             }
         }
