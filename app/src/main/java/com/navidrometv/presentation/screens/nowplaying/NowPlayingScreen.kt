@@ -169,7 +169,9 @@ fun NowPlayingScreen(
             colors = colors,
         )
 
-        if (track == null) {
+        // Local binding: smart cast is not available on a delegated property.
+        val playingTrack = track
+        if (playingTrack == null) {
             Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(
@@ -186,7 +188,7 @@ fun NowPlayingScreen(
             }
         } else {
             NowPlayingContent(
-                track = track,
+                track = playingTrack,
                 isPlaying = isPlaying,
                 shuffle = shuffle,
                 repeatMode = repeatMode,
@@ -197,7 +199,7 @@ fun NowPlayingScreen(
                 lyricsUnavailableReason = ui.lyricsUnavailableReason,
                 audioInfo = audioInfo,
                 requestedQuality = requestedQuality,
-                favorite = ui.favoriteOverride ?: track.isFavorite,
+                favorite = ui.favoriteOverride ?: playingTrack.isFavorite,
                 onSeek = viewModel::seekTo,
                 onTogglePlay = viewModel::togglePlayPause,
                 onNext = viewModel::next,
