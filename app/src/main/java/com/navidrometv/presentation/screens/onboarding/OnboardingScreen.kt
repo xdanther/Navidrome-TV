@@ -62,7 +62,11 @@ fun OnboardingScreen(
                 .fillMaxSize()
                 .background(
                     Brush.linearGradient(
-                        listOf(NavidromeColors.Surface, NavidromeColors.Ink, Color(0xFF08090A)),
+                        listOf(
+                            NavidromeColors.AmbientSand,
+                            NavidromeColors.AmbientSage,
+                            NavidromeColors.AmbientSky,
+                        ),
                     ),
                 ),
             verticalAlignment = Alignment.CenterVertically,
@@ -144,7 +148,7 @@ fun OnboardingScreen(
                     state.check == ConnectionCheckState.SUCCESS && state.message != null -> Text(
                         text = state.message.orEmpty(),
                         style = AppType.bodyMuted,
-                        color = Color(0xFF6BE38B),
+                        color = Color(0xFF1E7A3C),
                     )
                     state.check == ConnectionCheckState.TESTING -> Text(
                         text = "Contacting server…",
@@ -157,7 +161,7 @@ fun OnboardingScreen(
                         Text(
                             text = "Connection failed",
                             style = AppType.bodyMuted,
-                            color = Color(0xFFFF8A8A),
+                            color = Color(0xFFB3261E),
                         )
                         Text(
                             text = state.error?.message.orEmpty(),
@@ -212,10 +216,10 @@ private fun SetupField(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 6.dp)
-                .background(NavidromeColors.SurfaceElevated, RoundedCornerShape(14.dp))
+                .background(NavidromeColors.Glass, RoundedCornerShape(14.dp))
                 .border(
                     width = if (focused) 2.dp else 1.dp,
-                    color = if (focused) Color.White else NavidromeColors.SurfaceVariant,
+                    color = if (focused) NavidromeColors.Accent else NavidromeColors.Border,
                     shape = RoundedCornerShape(14.dp),
                 )
                 .padding(horizontal = 16.dp, vertical = 14.dp)

@@ -133,13 +133,13 @@ private fun DecadeCard(decade: Decade, onClick: () -> Unit) {
             modifier = Modifier
                 .fillMaxSize()
                 .background(
-                    Brush.linearGradient(listOf(NavidromeColors.SurfaceElevated, NavidromeColors.Surface)),
+                    Brush.linearGradient(listOf(Color(0xFFFFE9D6), Color(0xFFF6CFB2))),
                     RoundedCornerShape(Dimens.cardCorner),
                 )
                 .padding(Space.lg),
             contentAlignment = Alignment.BottomStart,
         ) {
-            Text(text = decade.label, style = AppType.section, color = NavidromeColors.OnSurface)
+            Text(text = decade.label, style = AppType.section, color = NavidromeColors.Ink)
         }
     }
 }

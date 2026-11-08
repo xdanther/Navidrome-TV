@@ -14,6 +14,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
@@ -31,9 +32,9 @@ import com.navidrometv.core.model.Genre
 import com.navidrometv.core.model.Playlist
 
 /**
- * Album card: square artwork with a two-line caption, the standard TV media card.
- * Focus scales the card and draws a white outline; the artwork itself is never
- * washed out or recoloured, so covers keep their true colours.
+ * Album card: square artwork with a two-line caption below it, the standard media
+ * card for a light stage. Artwork carries a soft drop shadow so it lifts off the
+ * ambient backdrop; focus scales the card and draws the ink outline.
  */
 @Composable
 fun AlbumCard(
@@ -46,7 +47,14 @@ fun AlbumCard(
     Column(modifier = modifier.width(width)) {
         TvClickable(
             onClick = onClick,
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .shadow(
+                    Dimens.cardElevation,
+                    RoundedCornerShape(Dimens.cardCorner),
+                    ambientColor = Color.Black.copy(alpha = 0.10f),
+                    spotColor = Color.Black.copy(alpha = 0.14f),
+                ),
             shape = RoundedCornerShape(Dimens.cardCorner),
         ) {
             Artwork(
@@ -140,12 +148,12 @@ fun PlaylistCard(
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .background(Brush.verticalGradient(listOf(Color.Transparent, Color(0xCC000000)))),
+                        .background(Brush.verticalGradient(listOf(Color.Transparent, Color(0x99000000)))),
                 )
                 Text(
                     text = playlist.name,
                     style = AppType.cardTitle,
-                    color = NavidromeColors.OnSurface,
+                    color = Color.White,
                     maxLines = 3,
                     overflow = TextOverflow.Ellipsis,
                     modifier = Modifier
@@ -164,9 +172,9 @@ fun PlaylistCard(
 }
 
 /**
- * Genre tile. The tiles use quiet, desaturated gradient surfaces instead of a
- * rainbow so the palette stays neutral; the label and album count carry the
- * information.
+ * Genre tile. Tiles use soft, fully saturated pastel washes (the one place the
+ * chrome is allowed colour) so shelves of genres read like album-cover walls on a
+ * light background.
  */
 @Composable
 fun GenreCard(
@@ -177,11 +185,11 @@ fun GenreCard(
     colorIndex: Int = 0,
 ) {
     val gradients = listOf(
-        listOf(Color(0xFF2C3440), Color(0xFF171A1E)),
-        listOf(Color(0xFF2A3536), Color(0xFF161B1B)),
-        listOf(Color(0xFF34302A), Color(0xFF1B1916)),
-        listOf(Color(0xFF2B2E38), Color(0xFF16181D)),
-        listOf(Color(0xFF2C332E), Color(0xFF171B18)),
+        listOf(Color(0xFFFFE3CF), Color(0xFFF8C7A8)),
+        listOf(Color(0xFFDCEAFB), Color(0xFFBBD7F7)),
+        listOf(Color(0xFFE1F2E4), Color(0xFFC3E3CB)),
+        listOf(Color(0xFFF1E3F6), Color(0xFFDCC8EB)),
+        listOf(Color(0xFFFAEDE4), Color(0xFFEBD3C4)),
     )
     val colors = gradients[colorIndex % gradients.size]
     TvClickable(onClick = onClick, modifier = modifier.width(width)) {
@@ -197,14 +205,14 @@ fun GenreCard(
                 Text(
                     text = genre.name,
                     style = AppType.section,
-                    color = NavidromeColors.OnSurface,
+                    color = NavidromeColors.Ink,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
                 Text(
                     text = Formatters.plural(genre.albumCount, "album"),
                     style = AppType.cardSubtitle,
-                    color = NavidromeColors.OnSurfaceMuted,
+                    color = NavidromeColors.Ink.copy(alpha = 0.62f),
                 )
             }
         }
@@ -220,7 +228,7 @@ fun SkeletonTile(modifier: Modifier = Modifier, width: Dp = Space.cardArtwork) {
                 .fillMaxWidth()
                 .aspectRatio(1f)
                 .clip(RoundedCornerShape(Dimens.cardCorner))
-                .background(NavidromeColors.SurfaceElevated),
+                .background(Color.White.copy(alpha = 0.45f)),
         )
         Box(
             Modifier
@@ -228,7 +236,7 @@ fun SkeletonTile(modifier: Modifier = Modifier, width: Dp = Space.cardArtwork) {
                 .fillMaxWidth(0.7f)
                 .height(12.dp)
                 .clip(RoundedCornerShape(6.dp))
-                .background(NavidromeColors.SurfaceElevated),
+                .background(Color.White.copy(alpha = 0.45f)),
         )
     }
 }

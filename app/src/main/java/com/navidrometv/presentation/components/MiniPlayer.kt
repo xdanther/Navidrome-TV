@@ -18,6 +18,8 @@ import androidx.compose.material.icons.rounded.SkipNext
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.tv.material3.Text
@@ -48,8 +50,14 @@ fun MiniPlayer(
         modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = Space.screenHorizontal, vertical = Space.sm)
-            .background(NavidromeColors.SurfaceElevated.copy(alpha = 0.92f), RoundedCornerShape(20.dp))
-            .border(1.dp, NavidromeColors.Border, RoundedCornerShape(20.dp))
+            .shadow(
+                Dimens.cardElevation,
+                RoundedCornerShape(20.dp),
+                ambientColor = Color.Black.copy(alpha = 0.12f),
+                spotColor = Color.Black.copy(alpha = 0.16f),
+            )
+            .background(NavidromeColors.Glass, RoundedCornerShape(20.dp))
+            .border(1.dp, Color.White.copy(alpha = 0.7f), RoundedCornerShape(20.dp))
             .padding(horizontal = Space.md, vertical = 10.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(Space.md),
@@ -123,13 +131,13 @@ private fun MiniControl(
         Box(
             modifier = Modifier
                 .size(44.dp)
-                .background(NavidromeColors.SurfaceVariant.copy(alpha = 0.8f), RoundedCornerShape(percent = 50)),
+                .background(Color.White.copy(alpha = 0.75f), RoundedCornerShape(percent = 50)),
             contentAlignment = Alignment.Center,
         ) {
             androidx.tv.material3.Icon(
                 imageVector = icon,
                 contentDescription = contentDescription,
-                tint = NavidromeColors.OnSurface,
+                tint = NavidromeColors.Ink,
                 modifier = Modifier.size(20.dp),
             )
         }

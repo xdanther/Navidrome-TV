@@ -252,13 +252,13 @@ private fun TextEntryOverlay(
             Box(
                 Modifier
                     .fillMaxWidth()
-                    .background(NavidromeColors.Ink, RoundedCornerShape(12.dp))
+                    .background(NavidromeColors.SurfaceVariant, RoundedCornerShape(12.dp))
                     .padding(16.dp),
             ) {
                 Text(
                     text = value.ifEmpty { "…" },
                     style = AppType.body,
-                    color = NavidromeColors.OnSurface,
+                    color = NavidromeColors.Ink,
                 )
             }
             TvKeyboard(

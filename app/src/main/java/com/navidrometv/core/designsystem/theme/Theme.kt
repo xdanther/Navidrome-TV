@@ -1,9 +1,13 @@
 package com.navidrometv.core.designsystem.theme
 
+import androidx.compose.foundation.Canvas
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
@@ -11,68 +15,83 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.tv.material3.MaterialTheme
-import androidx.tv.material3.darkColorScheme
+import androidx.tv.material3.lightColorScheme
 
 /**
- * Colour roles, built the way the Android TV guidance describes: a dark, neutral
- *Material scheme generated from a single key colour, with light text on dark
- * surfaces.
+ * Colour roles for the light "ambient" look.
  *
- * The neutral scale is almost colourless on purpose — the interface should read as
- * charcoal, not tinted — and the artwork supplies the only strong colour. The one
- * accent is Google blue, used for state (playing, active toggles, progress), while
- * focus itself is white per the TV focus guidance.
+ * The interface sits on a soft, warm-to-cool gradient instead of a flat dark
+ * surface: text is near-black ink, cards are translucent white glass, and a single
+ * system blue marks state (playing, active toggles, progress). Artwork supplies the
+ * strong colour, so the chrome stays quiet.
  */
 object NavidromeColors {
-    val Ink = Color(0xFF0E0F11)
-    val Surface = Color(0xFF17181B)
-    val SurfaceElevated = Color(0xFF1F2124)
-    val SurfaceVariant = Color(0xFF2A2C30)
-    val OnSurface = Color(0xFFF1F2F4)
-    val OnSurfaceMuted = Color(0xFF9AA0A6)
-    val Accent = Color(0xFF8AB4F8)
-    val AccentMuted = Color(0xFF1F3A5F)
-    val Border = Color(0x3DFFFFFF)
-    val Scrim = Color(0xB3000000)
+    /** Primary text and solid dark fills (buttons, dim overlays). */
+    val Ink = Color(0xFF16181C)
+    val Surface = Color(0xFFFFFFFF)
+    val SurfaceElevated = Color(0xFFFFFFFF)
+
+    /** Low-contrast tint used for quiet fills on top of the light backdrop. */
+    val SurfaceVariant = Color(0x14000000)
+    val OnSurface = Color(0xFF16181C)
+    val OnSurfaceMuted = Color(0xFF64686F)
+    val Accent = Color(0xFF0A84FF)
+    val AccentMuted = Color(0xFFDCEAFE)
+    val Border = Color(0x1A000000)
+    val Scrim = Color(0x99000000)
+
+    /** White fill for the focused element. */
     val Focus = Color(0xFFFFFFFF)
+
+    /** Outline drawn outside a focused element; must stay visible on light chrome. */
+    val FocusRing = Color(0xFF16181C)
+
+    /** Translucent white panels: navigation pill, mini player, quiet buttons. */
+    val Glass = Color(0xF2FFFFFF)
+    val GlassSubtle = Color(0x8CFFFFFF)
+
+    // Backdrop gradient stops (warm sand, sage, sky, mist).
+    val AmbientSand = Color(0xFFF7EAD6)
+    val AmbientSage = Color(0xFFE6EFE8)
+    val AmbientSky = Color(0xFFDBE7F4)
+    val AmbientMist = Color(0xFFEDF1F7)
 }
 
-private val NavidromeDarkColorScheme = darkColorScheme(
+private val NavidromeLightColorScheme = lightColorScheme(
     primary = NavidromeColors.Accent,
-    onPrimary = NavidromeColors.Ink,
+    onPrimary = Color.White,
     primaryContainer = NavidromeColors.AccentMuted,
-    onPrimaryContainer = Color(0xFFD7E6FF),
-    secondary = Color(0xFFC4C7CC),
-    onSecondary = NavidromeColors.Ink,
-    background = NavidromeColors.Ink,
+    onPrimaryContainer = Color(0xFF0B3D7A),
+    secondary = NavidromeColors.Ink,
+    onSecondary = Color.White,
+    background = NavidromeColors.AmbientMist,
     onBackground = NavidromeColors.OnSurface,
     surface = NavidromeColors.Surface,
     onSurface = NavidromeColors.OnSurface,
     surfaceVariant = NavidromeColors.SurfaceVariant,
     onSurfaceVariant = NavidromeColors.OnSurfaceMuted,
-    error = Color(0xFFFFB4AB),
-    onError = Color(0xFF690005),
+    error = Color(0xFFB3261E),
+    onError = Color.White,
 )
 
 /** Roles that Material's scheme does not model but the 10-foot UI needs. */
 @Immutable
 data class AppColors(
     val cardScrim: Color = Color(0x00000000),
-    val focusedBorder: Color = NavidromeColors.Focus,
+    val focusedBorder: Color = NavidromeColors.FocusRing,
     val secondaryText: Color = NavidromeColors.OnSurfaceMuted,
-    val divider: Color = Color(0x1FFFFFFF),
-    val accentGradientStart: Color = Color(0xFF8AB4F8),
-    val accentGradientEnd: Color = Color(0xFF5B8DEF),
-    val overlay: Color = Color(0xCC000000),
+    val divider: Color = Color(0x14000000),
+    val accentGradientStart: Color = Color(0xFF0A84FF),
+    val accentGradientEnd: Color = Color(0xFF4F9BFF),
+    val overlay: Color = Color(0x99000000),
 )
 
 val LocalAppColors = staticCompositionLocalOf { AppColors() }
 
 /**
  * TV type scale. Sizes follow the guidance that TV typography runs noticeably
- * larger than mobile, uses Roboto, and avoids thin weights. Every style is also
- * scaled by the system font scale, so a 4K panel with a 2x density keeps the same
- * physical proportions as 1080p.
+ * larger than mobile, uses Roboto, and avoids thin weights. Section and page
+ * titles are bold, matching how a media app labels shelves.
  */
 object AppType {
     private val Family = FontFamily.SansSerif
@@ -86,26 +105,28 @@ object AppType {
     )
     val display = TextStyle(
         fontFamily = Family,
-        fontWeight = FontWeight.Medium,
+        fontWeight = FontWeight.Bold,
         fontSize = 36.sp,
         lineHeight = 44.sp,
         letterSpacing = (-0.4).sp,
     )
     val title = TextStyle(
         fontFamily = Family,
-        fontWeight = FontWeight.Medium,
-        fontSize = 28.sp,
-        lineHeight = 36.sp,
+        fontWeight = FontWeight.Bold,
+        fontSize = 30.sp,
+        lineHeight = 38.sp,
+        letterSpacing = (-0.3).sp,
     )
     val section = TextStyle(
         fontFamily = Family,
-        fontWeight = FontWeight.Medium,
+        fontWeight = FontWeight.Bold,
         fontSize = 24.sp,
         lineHeight = 30.sp,
+        letterSpacing = (-0.2).sp,
     )
     val cardTitle = TextStyle(
         fontFamily = Family,
-        fontWeight = FontWeight.Medium,
+        fontWeight = FontWeight.SemiBold,
         fontSize = 18.sp,
         lineHeight = 24.sp,
     )
@@ -132,11 +153,11 @@ object AppType {
         fontWeight = FontWeight.Medium,
         fontSize = 16.sp,
         lineHeight = 20.sp,
-        letterSpacing = 0.2.sp,
+        letterSpacing = 0.1.sp,
     )
     val overline = TextStyle(
         fontFamily = Family,
-        fontWeight = FontWeight.Medium,
+        fontWeight = FontWeight.SemiBold,
         fontSize = 12.sp,
         lineHeight = 16.sp,
         letterSpacing = 1.2.sp,
@@ -176,14 +197,49 @@ object Dimens {
     val cardCorner = 12.dp
     val panelCorner = 16.dp
     val pillCorner = 100.dp
-    val focusBorderWidth = 2.dp
+    val focusBorderWidth = 3.dp
+    val cardElevation = 10.dp
+    val floatingElevation = 20.dp
     const val FOCUS_SCALE = 1.10f
+}
+
+/**
+ * The ambient backdrop: a diagonal wash from warm sand through sage into cool sky,
+ * with a soft highlight near the top. It is drawn once behind the whole app so every
+ * screen shares the same light stage and cards read as glass on top of it.
+ */
+@Composable
+fun AmbientBackdrop(modifier: Modifier = Modifier) {
+    Canvas(modifier = modifier) {
+        drawRect(
+            brush = Brush.linearGradient(
+                colors = listOf(
+                    NavidromeColors.AmbientSand,
+                    NavidromeColors.AmbientSage,
+                    NavidromeColors.AmbientSky,
+                    NavidromeColors.AmbientMist,
+                ),
+                start = Offset(0f, 0f),
+                end = Offset(size.width, size.height * 1.2f),
+            ),
+        )
+        drawRect(
+            brush = Brush.radialGradient(
+                colors = listOf(
+                    Color.White.copy(alpha = 0.55f),
+                    Color.Transparent,
+                ),
+                center = Offset(size.width * 0.62f, size.height * 0.02f),
+                radius = size.width * 0.8f,
+            ),
+        )
+    }
 }
 
 @Composable
 fun NavidromeTvTheme(content: @Composable () -> Unit) {
     CompositionLocalProvider(LocalAppColors provides AppColors()) {
-        MaterialTheme(colorScheme = NavidromeDarkColorScheme) {
+        MaterialTheme(colorScheme = NavidromeLightColorScheme) {
             content()
         }
     }

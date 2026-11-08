@@ -177,7 +177,7 @@ fun NowPlayingScreen(
                     Text(
                         text = "Nothing playing",
                         style = AppType.title,
-                        color = NavidromeColors.OnSurface,
+                        color = Color.White,
                     )
                     ActionButton(
                         text = "Back to browsing",
@@ -643,7 +643,7 @@ private fun AudioInfoPanel(track: Track, info: AudioPlaybackInfo?, quality: Stre
     Column(
         modifier = Modifier
             .padding(top = Space.md)
-            .background(NavidromeColors.SurfaceVariant.copy(alpha = 0.55f))
+            .background(Color.White.copy(alpha = 0.08f))
             .padding(horizontal = Space.md, vertical = Space.sm),
         verticalArrangement = Arrangement.spacedBy(2.dp),
     ) {
@@ -704,11 +704,11 @@ private fun QueuePanel(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Column {
-                    Text(text = "Up Next", style = AppType.title, color = NavidromeColors.OnSurface)
+                    Text(text = "Up Next", style = AppType.title, color = Color.White)
                     Text(
                         text = Formatters.plural(queue.size, "song") + " in queue",
                         style = AppType.cardSubtitle,
-                        color = NavidromeColors.OnSurfaceMuted,
+                        color = Color.White.copy(alpha = 0.55f),
                     )
                 }
                 Row(horizontalArrangement = Arrangement.spacedBy(Space.sm)) {
@@ -753,7 +753,7 @@ private fun QueuePanel(
                                         color = if (isCurrent) {
                                             NavidromeColors.Accent
                                         } else {
-                                            NavidromeColors.OnSurfaceMuted
+                                            Color.White.copy(alpha = 0.55f)
                                         },
                                         modifier = Modifier.width(28.dp),
                                     )
@@ -764,7 +764,7 @@ private fun QueuePanel(
                                             color = if (isCurrent) {
                                                 NavidromeColors.Accent
                                             } else {
-                                                NavidromeColors.OnSurface
+                                                Color.White
                                             },
                                             maxLines = 1,
                                             overflow = TextOverflow.Ellipsis,
@@ -772,7 +772,7 @@ private fun QueuePanel(
                                         Text(
                                             text = item.artistName.orEmpty(),
                                             style = AppType.cardSubtitle,
-                                            color = NavidromeColors.OnSurfaceMuted,
+                                            color = Color.White.copy(alpha = 0.55f),
                                             maxLines = 1,
                                             overflow = TextOverflow.Ellipsis,
                                         )
@@ -780,7 +780,7 @@ private fun QueuePanel(
                                     Text(
                                         text = Formatters.duration(item.durationMs),
                                         style = AppType.metadata,
-                                        color = NavidromeColors.OnSurfaceMuted,
+                                        color = Color.White.copy(alpha = 0.55f),
                                     )
                                 }
                             }

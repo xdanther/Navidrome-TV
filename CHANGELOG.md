@@ -25,8 +25,14 @@ All notable changes to this project are documented here. The format follows
 
 ### Changed
 
-### Changed
-
+- Replaced the dark charcoal chrome with a light, ambient stage: a soft
+  sand-to-sky gradient behind every screen, translucent white glass for the
+  navigation capsule and mini player, ink text with bold shelf titles, pastel
+  genre tiles and a dark 3dp focus ring that stays readable on light surfaces.
+  Navigation is now a centered floating capsule whose current destination is a
+  solid white pill, and the utility icons (search, settings, party) close it.
+  Now Playing keeps its dark, artwork-driven screen so playback reads as its own
+  space.
 - Focus now grows the element to 1.10x (the top of the TV guidance range) and draws
   its outline outside the element, instead of a 1.05x scale with an inset outline
   that read like a shadow. The translucent white veil over focused covers is gone and

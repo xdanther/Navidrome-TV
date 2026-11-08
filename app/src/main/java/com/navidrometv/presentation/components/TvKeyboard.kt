@@ -61,7 +61,7 @@ fun TvKeyboard(
 
     Column(
         modifier = modifier
-            .background(NavidromeColors.Surface.copy(alpha = 0.55f), RoundedCornerShape(24.dp))
+            .background(NavidromeColors.Glass, RoundedCornerShape(24.dp))
             .padding(horizontal = 24.dp, vertical = 18.dp)
             .focusGroup(),
         verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -101,14 +101,14 @@ private fun KeyButton(
             .then(if (wide) Modifier.size(width = 118.dp, height = 46.dp) else Modifier.size(62.dp))
             .background(
                 when {
-                    focused -> NavidromeColors.OnSurface
+                    focused -> NavidromeColors.Surface
                     primary -> NavidromeColors.Accent
                     else -> NavidromeColors.SurfaceVariant.copy(alpha = 0.75f)
                 },
                 RoundedCornerShape(12.dp),
             )
             .then(
-                if (focused) Modifier.border(2.dp, Color.White, RoundedCornerShape(12.dp)) else Modifier,
+                if (focused) Modifier.border(2.dp, NavidromeColors.Ink, RoundedCornerShape(12.dp)) else Modifier,
             )
             .clickable(onClick = onClick)
             .onFocusChanged { focused = it.isFocused },

@@ -28,7 +28,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import androidx.navigation.NavType
-import com.navidrometv.core.designsystem.theme.NavidromeColors
+import com.navidrometv.core.designsystem.theme.AmbientBackdrop
 import com.navidrometv.data.prefs.AppSettings
 import com.navidrometv.playback.PlaybackRepository
 import com.navidrometv.presentation.components.MiniPlayer
@@ -58,11 +58,8 @@ fun NavidromeTvApp(
     val mainViewModel: MainViewModel = hiltViewModel()
     val startState by mainViewModel.startState.collectAsStateWithLifecycle()
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(NavidromeColors.Ink),
-    ) {
+    Box(modifier = Modifier.fillMaxSize()) {
+        AmbientBackdrop(Modifier.matchParentSize())
         when (val state = startState) {
             AppStartState.Loading -> SplashScreen()
             AppStartState.Onboarding -> OnboardingScreen(onConnected = mainViewModel::onConnected)
@@ -251,9 +248,7 @@ private fun MainShell(
                     onOpen = openNowPlaying,
                     onTogglePlay = playback::togglePlayPause,
                     onNext = playback::next,
-                    modifier = Modifier
-                        .align(Alignment.BottomCenter)
-                        .background(NavidromeColors.Ink.copy(alpha = 0.35f)),
+                    modifier = Modifier.align(Alignment.BottomCenter),
                 )
             }
         }

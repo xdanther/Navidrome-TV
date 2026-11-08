@@ -106,7 +106,7 @@ fun PartyModeScreen(
                     Text(
                         text = error,
                         style = AppType.cardSubtitle,
-                        color = Color(0xFFFF8A8A),
+                        color = Color(0xFFB3261E),
                         modifier = Modifier.padding(top = Space.md),
                     )
                 }

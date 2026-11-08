@@ -61,7 +61,8 @@ fun TvClickable(
     enabled: Boolean = true,
     focusedScale: Float = Dimens.FOCUS_SCALE,
     shape: Shape = RoundedCornerShape(Dimens.cardCorner),
-    ringWidth: Dp = 3.dp,
+    ringWidth: Dp = Dimens.focusBorderWidth,
+    ringColor: Color = NavidromeColors.FocusRing,
     onFocusChanged: ((Boolean) -> Unit)? = null,
     content: @Composable BoxScope.(focused: Boolean) -> Unit,
 ) {
@@ -94,7 +95,7 @@ fun TvClickable(
                         else -> size.minDimension / 2f
                     }
                     drawRoundRect(
-                        color = NavidromeColors.Focus.copy(alpha = ring),
+                        color = ringColor.copy(alpha = ring),
                         topLeft = Offset(-stroke / 2f, -stroke / 2f),
                         size = Size(size.width + stroke, size.height + stroke),
                         cornerRadius = CornerRadius(radius + stroke / 2f),
@@ -116,9 +117,9 @@ fun TvClickable(
 }
 
 /**
- * Pill action. The primary action is filled with the accent colour and the focused
- * state inverts it to white with dark text, so the focused button is the brightest
- * object in its region without any glow.
+ * Pill action. The primary action is a solid ink pill with white text; the focused
+ * state lifts it to white with dark text and a heavy outline, so the active button
+ * separates cleanly from the light backdrop without a glow.
  */
 @Composable
 fun ActionButton(
@@ -137,22 +138,22 @@ fun ActionButton(
         shape = pill,
     ) { focused ->
         val background = when {
-            !enabled -> NavidromeColors.SurfaceVariant.copy(alpha = 0.55f)
-            focused -> NavidromeColors.Focus
-            primary -> NavidromeColors.Accent
-            else -> Color.Transparent
+            !enabled -> NavidromeColors.SurfaceVariant
+            focused -> NavidromeColors.Surface
+            primary -> NavidromeColors.Ink
+            else -> NavidromeColors.GlassSubtle
         }
         val contentColor = when {
             !enabled -> NavidromeColors.OnSurfaceMuted
             focused -> NavidromeColors.Ink
-            primary -> NavidromeColors.Ink
+            primary -> Color.White
             else -> NavidromeColors.OnSurface
         }
         Row(
             modifier = Modifier
                 .background(background, pill)
                 .then(
-                    if (primary || focused || !enabled) {
+                    if (primary || !enabled) {
                         Modifier
                     } else {
                         Modifier.border(1.dp, NavidromeColors.Border, pill)
@@ -177,9 +178,8 @@ fun ActionButton(
 }
 
 /**
- * Circular icon control for transport buttons. Unfocused it is a quiet translucent
- * surface; focused it fills white with a dark glyph, which is how TV media controls
- * signal the active remote target.
+ * Circular icon control. Unfocused it is a quiet translucent disc; focused it fills
+ * solid white, which is how TV media controls signal the active remote target.
  */
 @Composable
 fun CircleIconButton(
@@ -189,8 +189,9 @@ fun CircleIconButton(
     modifier: Modifier = Modifier,
     size: Int = 56,
     tint: Color = NavidromeColors.OnSurface,
-    background: Color = NavidromeColors.SurfaceVariant.copy(alpha = 0.55f),
+    background: Color = NavidromeColors.SurfaceVariant,
     enabled: Boolean = true,
+    ringColor: Color = NavidromeColors.FocusRing,
 ) {
     val circle = RoundedCornerShape(percent = 50)
     TvClickable(
@@ -198,10 +199,11 @@ fun CircleIconButton(
         enabled = enabled,
         modifier = modifier,
         shape = circle,
+        ringColor = ringColor,
     ) { focused ->
         val surface = when {
             !enabled -> background.copy(alpha = 0.35f)
-            focused -> NavidromeColors.Focus
+            focused -> NavidromeColors.Surface
             else -> background
         }
         val iconTint = when {
@@ -252,8 +254,8 @@ fun FocusableRow(
             modifier = Modifier
                 .background(
                     when {
-                        focused -> Color.White.copy(alpha = 0.16f)
-                        selected -> Color.White.copy(alpha = 0.08f)
+                        focused -> Color.Black.copy(alpha = 0.09f)
+                        selected -> Color.Black.copy(alpha = 0.05f)
                         else -> Color.Transparent
                     },
                     shape,
@@ -292,8 +294,8 @@ fun FilterChip(
             modifier = Modifier
                 .background(
                     when {
-                        selected -> NavidromeColors.Focus
-                        focused -> Color.White.copy(alpha = 0.16f)
+                        selected -> NavidromeColors.Ink
+                        focused -> NavidromeColors.Surface
                         else -> Color.Transparent
                     },
                     pill,
@@ -310,7 +312,11 @@ fun FilterChip(
             Text(
                 text = label,
                 style = AppType.metadata,
-                color = if (selected) NavidromeColors.Ink else NavidromeColors.OnSurface,
+                color = when {
+                    selected -> Color.White
+                    focused -> NavidromeColors.Ink
+                    else -> NavidromeColors.OnSurface
+                },
             )
         }
     }
@@ -349,10 +355,10 @@ fun SectionHeader(
                 Text(
                     text = actionLabel,
                     style = AppType.metadata,
-                    color = if (focused) NavidromeColors.Ink else NavidromeColors.OnSurfaceMuted,
+                    color = if (focused) Color.White else NavidromeColors.OnSurfaceMuted,
                     modifier = Modifier
                         .background(
-                            if (focused) NavidromeColors.Focus else Color.Transparent,
+                            if (focused) NavidromeColors.Ink else Color.Transparent,
                             RoundedCornerShape(Dimens.pillCorner),
                         )
                         .padding(horizontal = 14.dp, vertical = 6.dp),

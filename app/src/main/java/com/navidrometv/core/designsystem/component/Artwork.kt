@@ -35,11 +35,11 @@ private val NoCoverArtUrl: (String?, Int) -> String? = { _, _ -> null }
 val LocalCoverArtUrl = staticCompositionLocalOf { NoCoverArtUrl }
 
 private val PlaceholderGradients = listOf(
-    listOf(Color(0xFF2A2C30), Color(0xFF17181B)),
-    listOf(Color(0xFF2E3438), Color(0xFF17191B)),
-    listOf(Color(0xFF262E36), Color(0xFF141719)),
-    listOf(Color(0xFF33302B), Color(0xFF1A1917)),
-    listOf(Color(0xFF2B332D), Color(0xFF161A17)),
+    listOf(Color(0xFFE9E4DC), Color(0xFFCFC8BE)),
+    listOf(Color(0xFFDDE7EC), Color(0xFFC2D3DC)),
+    listOf(Color(0xFFE7E3EE), Color(0xFFCEC7DD)),
+    listOf(Color(0xFFF0E8DC), Color(0xFFD9CDBB)),
+    listOf(Color(0xFFDFEDE4), Color(0xFFC5DACD)),
 )
 
 private fun gradientFor(seed: String?): Brush {
@@ -90,7 +90,7 @@ fun Artwork(
             Icon(
                 imageVector = Icons.Rounded.MusicNote,
                 contentDescription = null,
-                tint = NavidromeColors.OnSurface.copy(alpha = 0.28f),
+                tint = NavidromeColors.Ink.copy(alpha = 0.30f),
                 modifier = Modifier.fillMaxSize(0.34f),
             )
         }
