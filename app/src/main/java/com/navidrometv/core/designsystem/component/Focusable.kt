@@ -1,8 +1,9 @@
 package com.navidrometv.core.designsystem.component
 
+import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
-import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -27,10 +28,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.tv.material3.Icon
-import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
 import com.navidrometv.core.designsystem.theme.AppType
 import com.navidrometv.core.designsystem.theme.Dimens
@@ -39,9 +40,13 @@ import com.navidrometv.core.designsystem.theme.NavidromeColors
 import com.navidrometv.core.designsystem.theme.Space
 
 /**
- * The base interactive surface for the TV UI. Focus grows the element instead of
- * changing layout size, so neighbours do not jump, and Enter/D-pad-centre map to
- * click exactly like a touch would.
+ * The base interactive surface for the TV UI.
+ *
+ * Focus is signalled three ways at once — a filled/high-contrast body treatment in
+ * the caller, an animated ring drawn above the content, and a small scale-up — so it
+ * reads from several metres away instead of depending on a thin outline. The scale
+ * happens on the graphics layer, which never changes the measured size, so
+ * neighbours do not jump while the user moves through a row.
  */
 @Composable
 fun TvClickable(
@@ -50,6 +55,7 @@ fun TvClickable(
     enabled: Boolean = true,
     focusedScale: Float = Dimens.FOCUS_SCALE,
     shape: Shape = RoundedCornerShape(Dimens.cardCorner),
+    ringWidth: Dp = 3.dp,
     onFocusChanged: ((Boolean) -> Unit)? = null,
     content: @Composable BoxScope.(focused: Boolean) -> Unit,
 ) {
@@ -58,6 +64,11 @@ fun TvClickable(
         targetValue = if (focused) focusedScale else 1f,
         animationSpec = spring(dampingRatio = 0.72f, stiffness = Spring.StiffnessMediumLow),
         label = "focus-scale",
+    )
+    val ring by animateFloatAsState(
+        targetValue = if (focused) 1f else 0f,
+        animationSpec = tween(durationMillis = 150),
+        label = "focus-ring",
     )
     Box(
         modifier = modifier
@@ -76,10 +87,25 @@ fun TvClickable(
             },
     ) {
         content(focused)
+        if (ring > 0.01f) {
+            Box(
+                modifier = Modifier
+                    .matchParentSize()
+                    .border(
+                        width = ringWidth * ring,
+                        color = Color.White.copy(alpha = 0.92f * ring),
+                        shape = shape,
+                    ),
+            )
+        }
     }
 }
 
-/** Large pill action used for Play / Shuffle / Queue rows on detail screens. */
+/**
+ * Large pill action used for Play / Shuffle / Queue rows on detail screens. Focus
+ * inverts the button to a solid white surface with dark text, matching the filled
+ * focus language used by the cards.
+ */
 @Composable
 fun ActionButton(
     text: String,
@@ -89,27 +115,29 @@ fun ActionButton(
     primary: Boolean = true,
     enabled: Boolean = true,
 ) {
-    val colors = LocalAppColors.current
+    val pill = RoundedCornerShape(Dimens.pillCorner)
     TvClickable(
         onClick = onClick,
         enabled = enabled,
         modifier = modifier,
-        shape = RoundedCornerShape(Dimens.pillCorner),
+        shape = pill,
         focusedScale = Dimens.FOCUS_SCALE,
     ) { focused ->
+        val background = when {
+            !enabled -> NavidromeColors.SurfaceVariant.copy(alpha = 0.4f)
+            focused -> Color.White
+            primary -> NavidromeColors.Accent
+            else -> NavidromeColors.SurfaceElevated.copy(alpha = 0.92f)
+        }
+        val contentColor = when {
+            !enabled -> NavidromeColors.OnSurfaceMuted
+            focused -> NavidromeColors.Ink
+            primary -> Color.White
+            else -> NavidromeColors.OnSurface
+        }
         Row(
             modifier = Modifier
-                .background(
-                    when {
-                        !enabled -> NavidromeColors.SurfaceVariant.copy(alpha = 0.4f)
-                        primary -> NavidromeColors.Accent
-                        else -> NavidromeColors.SurfaceElevated.copy(alpha = 0.92f)
-                    },
-                )
-                .then(
-                    if (focused) Modifier.border(2.dp, colors.focusedBorder, RoundedCornerShape(Dimens.pillCorner))
-                    else Modifier,
-                )
+                .background(background, pill)
                 .defaultMinSize(minHeight = 48.dp)
                 .padding(horizontal = 24.dp, vertical = 12.dp),
             horizontalArrangement = Arrangement.spacedBy(10.dp),
@@ -119,24 +147,20 @@ fun ActionButton(
                 Icon(
                     imageVector = icon,
                     contentDescription = null,
-                    tint = if (primary) Color.White else NavidromeColors.OnSurface,
+                    tint = contentColor,
                     modifier = Modifier.defaultMinSize(minWidth = 20.dp, minHeight = 20.dp),
                 )
             }
-            Text(
-                text = text,
-                style = AppType.button,
-                color = if (enabled) {
-                    if (primary) Color.White else NavidromeColors.OnSurface
-                } else {
-                    NavidromeColors.OnSurfaceMuted
-                },
-            )
+            Text(text = text, style = AppType.button, color = contentColor)
         }
     }
 }
 
-/** Circular icon control for transport buttons and per-row actions. */
+/**
+ * Circular icon control for transport buttons and per-row actions. The focused
+ * state fills with the accent colour so the active transport button is obvious
+ * without any glow.
+ */
 @Composable
 fun CircleIconButton(
     icon: ImageVector,
@@ -148,28 +172,37 @@ fun CircleIconButton(
     background: Color = NavidromeColors.SurfaceElevated.copy(alpha = 0.7f),
     enabled: Boolean = true,
 ) {
-    val colors = LocalAppColors.current
+    val circle = RoundedCornerShape(percent = 50)
     TvClickable(
         onClick = onClick,
         enabled = enabled,
         modifier = modifier,
-        shape = RoundedCornerShape(percent = 50),
+        shape = circle,
     ) { focused ->
+        val surface = when {
+            !enabled -> background.copy(alpha = 0.35f)
+            focused -> NavidromeColors.Accent
+            else -> background
+        }
+        val iconTint = when {
+            !enabled -> tint.copy(alpha = 0.35f)
+            focused -> Color.White
+            else -> tint
+        }
         Box(
             modifier = Modifier
                 .defaultMinSize(minWidth = size.dp, minHeight = size.dp)
-                .background(background)
-                .then(
-                    if (focused) Modifier.border(2.dp, colors.focusedBorder, RoundedCornerShape(percent = 50))
-                    else Modifier,
-                ),
+                .background(surface, circle),
             contentAlignment = Alignment.Center,
         ) {
             Icon(
                 imageVector = icon,
                 contentDescription = contentDescription,
-                tint = if (enabled) tint else tint.copy(alpha = 0.35f),
-                modifier = Modifier.defaultMinSize(minWidth = (size * 0.45f).dp, minHeight = (size * 0.45f).dp),
+                tint = iconTint,
+                modifier = Modifier.defaultMinSize(
+                    minWidth = (size * 0.45f).dp,
+                    minHeight = (size * 0.45f).dp,
+                ),
             )
         }
     }
@@ -177,7 +210,8 @@ fun CircleIconButton(
 
 /**
  * Focusable row used by lists (tracks, settings, playlists). Keeps a stable
- * height and paints the focus highlight behind the content.
+ * height and paints a bright filled surface plus a ring behind the content, so a
+ * focused track is unmistakable next to its neighbours.
  */
 @Composable
 fun FocusableRow(
@@ -193,21 +227,25 @@ fun FocusableRow(
         onClick = onClick,
         modifier = modifier,
         shape = shape,
-        focusedScale = 1.01f,
+        focusedScale = 1.015f,
+        ringWidth = 2.dp,
     ) { focused ->
         Box(
             modifier = Modifier
                 .background(
                     when {
-                        focused -> NavidromeColors.SurfaceVariant.copy(alpha = 0.85f)
-                        selected -> NavidromeColors.SurfaceElevated.copy(alpha = 0.6f)
+                        focused -> Color.White.copy(alpha = 0.2f)
+                        selected -> NavidromeColors.SurfaceElevated.copy(alpha = 0.72f)
                         else -> Color.Transparent
                     },
                     shape,
                 )
                 .then(
-                    if (focused) Modifier.border(1.5.dp, colors.focusedBorder.copy(alpha = 0.55f), shape)
-                    else Modifier,
+                    if (selected && !focused) {
+                        Modifier.border(1.dp, colors.focusedBorder.copy(alpha = 0.28f), shape)
+                    } else {
+                        Modifier
+                    },
                 )
                 .padding(contentPadding),
         ) {
@@ -224,25 +262,27 @@ fun FilterChip(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val pill = RoundedCornerShape(percent = 50)
     val colors = LocalAppColors.current
     TvClickable(
         onClick = onClick,
         modifier = modifier,
-        shape = RoundedCornerShape(percent = 50),
+        shape = pill,
+        ringWidth = 2.dp,
     ) { focused ->
         Box(
             modifier = Modifier
                 .background(
                     when {
-                        focused -> NavidromeColors.OnSurface
+                        focused -> Color.White
                         selected -> NavidromeColors.SurfaceVariant
                         else -> NavidromeColors.Surface.copy(alpha = 0.6f)
                     },
-                    RoundedCornerShape(percent = 50),
+                    pill,
                 )
                 .then(
                     if (selected && !focused) {
-                        Modifier.border(1.5.dp, colors.focusedBorder.copy(alpha = 0.5f), RoundedCornerShape(percent = 50))
+                        Modifier.border(1.5.dp, colors.focusedBorder.copy(alpha = 0.5f), pill)
                     } else {
                         Modifier
                     },
@@ -287,6 +327,7 @@ fun SectionHeader(
             TvClickable(
                 onClick = onAction,
                 shape = RoundedCornerShape(Dimens.pillCorner),
+                ringWidth = 2.dp,
             ) { focused ->
                 Text(
                     text = actionLabel,
@@ -294,7 +335,7 @@ fun SectionHeader(
                     color = if (focused) NavidromeColors.Ink else NavidromeColors.OnSurfaceMuted,
                     modifier = Modifier
                         .background(
-                            if (focused) NavidromeColors.OnSurface else Color.Transparent,
+                            if (focused) Color.White else Color.Transparent,
                             RoundedCornerShape(Dimens.pillCorner),
                         )
                         .padding(horizontal = 14.dp, vertical = 6.dp),

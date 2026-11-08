@@ -154,8 +154,10 @@ object Space {
     val screenTop = 40.dp
     val railWidth = 300.dp
     val contentBottomWithPlayer = 148.dp
-    val cardWidth = 188.dp
-    val cardArtwork = 188.dp
+    val cardWidth = 200.dp
+    val cardArtwork = 200.dp
+    val rowSpacing = 24.dp
+    val topBarHeight = 64.dp
 }
 
 object Dimens {

@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -61,18 +62,26 @@ fun Artwork(
     showFallbackIcon: Boolean = true,
 ) {
     val url = LocalCoverArtUrl.current(coverArtId, requestSizePx)
+    val context = LocalContext.current
+    // Build the request once per URL: a fresh ImageRequest on every recomposition
+    // makes Coil restart its work and is a direct cause of artwork flicker.
+    val request = remember(url) {
+        url?.let { target ->
+            ImageRequest.Builder(context)
+                .data(target)
+                .crossfade(220)
+                .build()
+        }
+    }
     Box(
         modifier = modifier
             .clip(shape)
             .background(gradientFor(coverArtId), shape),
         contentAlignment = Alignment.Center,
     ) {
-        if (url != null) {
+        if (request != null) {
             AsyncImage(
-                model = ImageRequest.Builder(LocalContext.current)
-                    .data(url)
-                    .crossfade(200)
-                    .build(),
+                model = request,
                 contentDescription = contentDescription,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.fillMaxSize(),

@@ -1,12 +1,22 @@
 package com.navidrometv.presentation
 
+import androidx.activity.compose.BackHandler
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -22,7 +32,9 @@ import com.navidrometv.core.designsystem.theme.NavidromeColors
 import com.navidrometv.data.prefs.AppSettings
 import com.navidrometv.playback.PlaybackRepository
 import com.navidrometv.presentation.components.MiniPlayer
+import com.navidrometv.presentation.components.LocalTopBarVisibility
 import com.navidrometv.presentation.components.TopBar
+import com.navidrometv.presentation.components.TopBarVisibility
 import com.navidrometv.presentation.navigation.Routes
 import com.navidrometv.presentation.screens.album.AlbumScreen
 import com.navidrometv.presentation.screens.artist.ArtistScreen
@@ -54,11 +66,16 @@ fun NavidromeTvApp(
         when (val state = startState) {
             AppStartState.Loading -> SplashScreen()
             AppStartState.Onboarding -> OnboardingScreen(onConnected = mainViewModel::onConnected)
-            AppStartState.Ready -> MainShell(
-                playback = playback,
-                settings = settings,
-                onDisconnected = mainViewModel::onDisconnected,
-            )
+            AppStartState.Ready -> {
+                val topBarVisibility = remember { TopBarVisibility() }
+                CompositionLocalProvider(LocalTopBarVisibility provides topBarVisibility) {
+                    MainShell(
+                        playback = playback,
+                        settings = settings,
+                        onDisconnected = mainViewModel::onDisconnected,
+                    )
+                }
+            }
         }
     }
 }
@@ -96,8 +113,22 @@ private fun MainShell(
         }
     }
 
+    val topBarVisibility = LocalTopBarVisibility.current
+    // Every destination opens with the navigation available.
+    LaunchedEffect(currentRoute) { topBarVisibility.visible = true }
+    // While the bar is collapsed, Back brings it back instead of leaving the app.
+    BackHandler(enabled = showChrome && !topBarVisibility.visible) {
+        topBarVisibility.visible = true
+    }
+
     Column(Modifier.fillMaxSize()) {
-        if (showChrome) {
+        AnimatedVisibility(
+            visible = showChrome && topBarVisibility.visible,
+            enter = fadeIn(animationSpec = tween(180)) +
+                expandVertically(animationSpec = tween(220)),
+            exit = fadeOut(animationSpec = tween(140)) +
+                shrinkVertically(animationSpec = tween(200)),
+        ) {
             TopBar(
                 currentRoute = currentRoute,
                 onNavigate = navigateTopLevel,

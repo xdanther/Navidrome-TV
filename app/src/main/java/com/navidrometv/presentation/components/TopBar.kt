@@ -1,6 +1,8 @@
 package com.navidrometv.presentation.components
 
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -31,9 +33,9 @@ import com.navidrometv.core.designsystem.theme.Space
 import com.navidrometv.presentation.navigation.Routes
 
 /**
- * Floating top navigation. Horizontal D-pad movement between destinations, with a
- * filled pill for the active destination and a soft surface for focus, so the
- * current location and the focus ring never look the same.
+ * Floating top navigation. The active destination is a solid white pill with dark
+ * text; focus inverts to the same filled treatment with an accent ring and a small
+ * scale-up, so selection and focus are both readable from across a room.
  */
 @Composable
 fun TopBar(
@@ -45,20 +47,22 @@ fun TopBar(
 ) {
     Row(
         modifier = modifier
-            .padding(horizontal = Space.screenHorizontal, vertical = Space.md)
-            .background(NavidromeColors.Ink.copy(alpha = 0.55f), RoundedCornerShape(22.dp))
-            .padding(horizontal = Space.lg, vertical = Space.xs),
+            .padding(horizontal = Space.screenHorizontal)
+            .padding(top = Space.sm, bottom = 2.dp)
+            .background(NavidromeColors.Ink.copy(alpha = 0.62f), RoundedCornerShape(20.dp))
+            .padding(horizontal = Space.md, vertical = 6.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween,
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(Space.lg),
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
         ) {
             Text(
                 text = "Navidrome",
                 style = AppType.section,
                 color = NavidromeColors.OnSurface,
+                modifier = Modifier.padding(horizontal = Space.xs),
             )
             Routes.topLevel.forEach { (route, label) ->
                 NavItem(
@@ -68,18 +72,22 @@ fun TopBar(
                 )
             }
         }
-        Row(horizontalArrangement = Arrangement.spacedBy(Space.xs)) {
-            IconNavItem(
-                contentDescription = "Party mode",
-                onClick = onOpenParty,
-            ) {
-                Text(text = "PARTY", style = AppType.overline, color = NavidromeColors.OnSurfaceMuted)
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(Space.xs),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            IconNavItem(contentDescription = "Party mode", onClick = onOpenParty) { focused ->
+                Text(
+                    text = "PARTY",
+                    style = AppType.overline,
+                    color = if (focused) NavidromeColors.Ink else NavidromeColors.OnSurfaceMuted,
+                )
             }
-            IconNavItem(contentDescription = "Settings", onClick = onOpenSettings) {
+            IconNavItem(contentDescription = "Settings", onClick = onOpenSettings) { focused ->
                 Icon(
                     imageVector = Icons.Rounded.Settings,
                     contentDescription = null,
-                    tint = NavidromeColors.OnSurfaceMuted,
+                    tint = if (focused) NavidromeColors.Ink else NavidromeColors.OnSurfaceMuted,
                     modifier = Modifier.padding(2.dp),
                 )
             }
@@ -94,38 +102,41 @@ private fun NavItem(
     onClick: () -> Unit,
 ) {
     var focused by remember { mutableStateOf(false) }
-    val scale by animateFloatAsState(if (focused) 1.04f else 1f, label = "nav-scale")
+    val pill = RoundedCornerShape(percent = 50)
+    val scale by animateFloatAsState(
+        targetValue = if (focused) 1.05f else 1f,
+        animationSpec = tween(durationMillis = 140),
+        label = "nav-scale",
+    )
+    val background by animateColorAsState(
+        targetValue = when {
+            selected -> Color.White
+            focused -> Color.White.copy(alpha = 0.92f)
+            else -> Color.Transparent
+        },
+        animationSpec = tween(durationMillis = 140),
+        label = "nav-pill",
+    )
     Box(
         modifier = Modifier
-            .graphicsLayer { scaleX = scale; scaleY = scale }
-            .clip(RoundedCornerShape(14.dp))
-            .background(
-                when {
-                    selected -> NavidromeColors.OnSurface
-                    focused -> NavidromeColors.SurfaceVariant
-                    else -> Color.Transparent
-                },
-            )
+            .graphicsLayer {
+                scaleX = scale
+                scaleY = scale
+            }
+            .clip(pill)
+            .background(background)
             .then(
-                if (focused && !selected) {
-                    Modifier.border(1.5.dp, Color.White.copy(alpha = 0.6f), RoundedCornerShape(14.dp))
-                } else {
-                    Modifier
-                },
+                if (focused) Modifier.border(2.dp, NavidromeColors.Accent, pill) else Modifier,
             )
             .clickable(onClick = onClick)
             .onFocusChanged { focused = it.isFocused }
-            .padding(horizontal = 16.dp, vertical = 8.dp),
+            .padding(horizontal = 18.dp, vertical = 7.dp),
         contentAlignment = Alignment.Center,
     ) {
         Text(
             text = label,
             style = AppType.button,
-            color = when {
-                selected -> NavidromeColors.Ink
-                focused -> NavidromeColors.OnSurface
-                else -> NavidromeColors.OnSurfaceMuted
-            },
+            color = if (selected || focused) NavidromeColors.Ink else NavidromeColors.OnSurfaceMuted,
         )
     }
 }
@@ -134,27 +145,24 @@ private fun NavItem(
 private fun IconNavItem(
     contentDescription: String,
     onClick: () -> Unit,
-    content: @Composable () -> Unit,
+    content: @Composable (focused: Boolean) -> Unit,
 ) {
     var focused by remember { mutableStateOf(false) }
+    val pill = RoundedCornerShape(percent = 50)
     Box(
         modifier = Modifier
-            .clip(RoundedCornerShape(14.dp))
-            .background(if (focused) NavidromeColors.SurfaceVariant else Color.Transparent)
+            .clip(pill)
+            .background(if (focused) Color.White else Color.Transparent, pill)
             .then(
-                if (focused) Modifier.border(1.5.dp, Color.White.copy(alpha = 0.6f), RoundedCornerShape(14.dp))
-                else Modifier,
+                if (focused) Modifier.border(2.dp, NavidromeColors.Accent, pill) else Modifier,
             )
             .clickable(onClick = onClick)
             .onFocusChanged { focused = it.isFocused }
-            .padding(horizontal = 12.dp, vertical = 10.dp),
+            .padding(horizontal = 14.dp, vertical = 8.dp),
         contentAlignment = Alignment.Center,
     ) {
-        Box(
-            modifier = Modifier.padding(2.dp),
-            contentAlignment = Alignment.Center,
-        ) {
-            content()
+        Box(modifier = Modifier.padding(2.dp), contentAlignment = Alignment.Center) {
+            content(focused)
         }
     }
 }

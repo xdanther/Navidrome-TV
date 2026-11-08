@@ -25,6 +25,18 @@ All notable changes to this project are documented here. The format follows
 
 ### Changed
 
+- Redesigned the 10-foot presentation: focus is now a filled, high-contrast
+  treatment with an animated ring and 1.06x scale instead of a thin outline, and the
+  top navigation collapses with an animation once Home is scrolled past its first
+  row (Back reveals it again).
+- Home and every carousel now use square 200dp artwork cards with 24dp gaps; the
+  oversized landscape hero row was removed so 5-7 covers fit at once. Playlist tiles
+  are square too.
+- Now Playing uses a balanced two-column layout with square artwork, a prominent
+  play/pause control and RTL-aware synchronised lyrics. Playback progress is now read
+  through `derivedStateOf`, so position ticks no longer recompose the artwork
+  background; artwork image requests and extracted palettes are cached per cover,
+  which removes the background flicker.
 - CI now builds, tests and lints the release variant only, and uploads the
   R8-minified release APK. Release signing uses the debug key unless the
   `RELEASE_*` environment variables supply a real keystore.

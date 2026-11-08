@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -26,7 +27,7 @@ import com.navidrometv.core.designsystem.theme.NavidromeColors
 import com.navidrometv.core.designsystem.theme.Space
 import com.navidrometv.presentation.components.AlbumRow
 import com.navidrometv.presentation.components.ArtistRow
-import com.navidrometv.presentation.components.FeaturedRow
+import com.navidrometv.presentation.components.HideTopBarOnScroll
 import com.navidrometv.presentation.components.GenreRow
 import com.navidrometv.presentation.components.PlaylistRow
 import com.navidrometv.playback.PlaybackState
@@ -78,7 +79,11 @@ private fun HomeContent(
     onToggleFavorite: (com.navidrometv.core.model.Track) -> Unit,
     onRefresh: () -> Unit,
 ) {
+    val listState = rememberLazyListState()
+    HideTopBarOnScroll(listState)
+
     LazyColumn(
+        state = listState,
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(
             start = Space.screenHorizontal,
@@ -86,7 +91,7 @@ private fun HomeContent(
             top = Space.md,
             bottom = Space.contentBottomWithPlayer,
         ),
-        verticalArrangement = Arrangement.spacedBy(Space.xl),
+        verticalArrangement = Arrangement.spacedBy(Space.lg),
     ) {
         item(key = "greeting") {
             Column {
@@ -99,16 +104,6 @@ private fun HomeContent(
                     text = if (state.hasHistory) "Picked up from your listening history" else "Fresh from your server",
                     style = AppType.bodyMuted,
                     color = NavidromeColors.OnSurfaceMuted,
-                )
-            }
-        }
-
-        if (state.featured.isNotEmpty()) {
-            item(key = "featured") {
-                FeaturedRow(
-                    albums = state.featured,
-                    onOpenAlbum = onOpenAlbum,
-                    label = if (state.hasHistory) "RECENTLY PLAYED" else "NEW ON YOUR SERVER",
                 )
             }
         }

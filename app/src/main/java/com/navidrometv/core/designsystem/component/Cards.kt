@@ -9,8 +9,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -49,15 +52,31 @@ fun AlbumCard(
             onClick = onClick,
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(Dimens.cardCorner),
-        ) {
-            Artwork(
-                coverArtId = album.coverArtId,
-                contentDescription = "${album.name} cover",
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .aspectRatio(1f),
-                shape = RoundedCornerShape(Dimens.cardCorner),
+        ) { focused ->
+            val highlight by animateFloatAsState(
+                targetValue = if (focused) 1f else 0f,
+                animationSpec = tween(durationMillis = 150),
+                label = "album-focus",
             )
+            Box {
+                Artwork(
+                    coverArtId = album.coverArtId,
+                    contentDescription = "${album.name} cover",
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .aspectRatio(1f),
+                    shape = RoundedCornerShape(Dimens.cardCorner),
+                )
+                // A focused cover lifts its own brightness as well as the ring, so
+                // the cue survives dark artwork and sits well beyond a thin outline.
+                if (highlight > 0.01f) {
+                    Box(
+                        Modifier
+                            .matchParentSize()
+                            .background(Color.White.copy(alpha = 0.14f * highlight)),
+                    )
+                }
+            }
         }
         Text(
             text = album.name,
@@ -121,14 +140,14 @@ fun PlaylistCard(
     playlist: Playlist,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    width: Dp = 268.dp,
+    width: Dp = Space.cardArtwork,
 ) {
     Column(modifier = modifier.width(width)) {
         TvClickable(onClick = onClick, modifier = Modifier.fillMaxWidth()) {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .aspectRatio(16f / 9f)
+                    .aspectRatio(1f)
                     .clip(RoundedCornerShape(Dimens.cardCorner))
                     .background(Brush.linearGradient(listOf(Color(0xFF3A2340), Color(0xFF1A1226)))),
             ) {
@@ -145,9 +164,9 @@ fun PlaylistCard(
                 )
                 Text(
                     text = playlist.name,
-                    style = AppType.section,
+                    style = AppType.cardTitle,
                     color = Color.White,
-                    maxLines = 2,
+                    maxLines = 3,
                     overflow = TextOverflow.Ellipsis,
                     modifier = Modifier
                         .align(Alignment.BottomStart)

@@ -1,5 +1,6 @@
 package com.navidrometv.presentation.common
 
+import android.util.LruCache
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
@@ -20,9 +21,11 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 /**
- * Colours derived from the current album's artwork. The palette is computed on a
- * small (160px) bitmap on a background dispatcher, so it costs little and never
- * blocks the frame that starts a track transition.
+ * Colours derived from the current album's artwork. The palette is computed once
+ * per artwork from a small (160px) bitmap on a background dispatcher and then held
+ * in a process-wide cache, so scrubbing back and forth through tracks never
+ * re-extracts the same cover or falls back to the default palette on the frame a
+ * new track starts.
  */
 @Immutable
 data class ArtworkColors(
@@ -37,6 +40,8 @@ val DefaultArtworkColors = ArtworkColors(
     background = Color(0xFF0B0A12),
 )
 
+private val PaletteCache = LruCache<String, ArtworkColors>(24)
+
 private fun Color.scale(factor: Float): Color =
     Color(red * factor, green * factor, blue * factor, alpha)
 
@@ -44,14 +49,20 @@ private fun Color.scale(factor: Float): Color =
 fun rememberArtworkColors(coverArtId: String?): ArtworkColors {
     val url = LocalCoverArtUrl.current(coverArtId, 160)
     val context = LocalContext.current
-    var colors by remember(url) { mutableStateOf(DefaultArtworkColors) }
+    var colors by remember(url) {
+        mutableStateOf(url?.let { PaletteCache.get(it) } ?: DefaultArtworkColors)
+    }
 
     LaunchedEffect(url) {
         if (url == null) {
             colors = DefaultArtworkColors
             return@LaunchedEffect
         }
-        colors = withContext(Dispatchers.IO) {
+        PaletteCache.get(url)?.let {
+            colors = it
+            return@LaunchedEffect
+        }
+        val computed = withContext(Dispatchers.IO) {
             runCatching {
                 val request = ImageRequest.Builder(context)
                     .data(url)
@@ -75,6 +86,8 @@ fun rememberArtworkColors(coverArtId: String?): ArtworkColors {
                 )
             }.getOrDefault(DefaultArtworkColors)
         }
+        PaletteCache.put(url, computed)
+        colors = computed
     }
 
     return colors
