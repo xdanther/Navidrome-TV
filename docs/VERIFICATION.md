@@ -21,18 +21,20 @@ errors. Lint warnings do not fail the build; check the uploaded report.
 
 ## Last verified run
 
-Run [42494393139](https://github.com/xdanther/Navidrome-TV/actions/runs/42494393139)
-(2026-11-06, branch `freebuff/ce4e351aa72f4e6085fe8f89`, commit `8d873e8`) finished
-green after the 10-foot redesign: `testReleaseUnitTest` passed, `lintRelease` reported
-no errors, and `assembleRelease` produced the R8-minified APK.
+Run [42495969792](https://github.com/xdanther/Navidrome-TV/actions/runs/42495969792)
+(2026-11-06, branch `freebuff/ce4e351aa72f4e6085fe8f89`, commit `32e7deb`) finished
+green for the Android TV design rewrite: `testReleaseUnitTest` passed, `lintRelease`
+reported no errors, and `assembleRelease` produced the R8-minified APK. Two earlier
+runs on the same branch failed and were fixed rather than bypassed — a smart cast on a
+delegated `track`, and a trailing comma left behind by a palette replacement.
 
-That run proves the redesigned composables compile against Compose 1.7 and tv-material
-1.0.0 and that lint accepts them. It does **not** prove anything about how the result
-looks or feels: focus contrast, the navigation collapse, artwork proportions, lyric
-layout and background stability all need a device or emulator to assess.
+That run proves the new palette, type scale, tab navigation and focus components
+compile and lint. It does **not** demonstrate how they look: colour contrast on a real
+panel, focus legibility at three metres, overscan behaviour and tab underline
+animation still need a device or emulator.
 
-Earlier release run [42300761466](https://github.com/xdanther/Navidrome-TV/actions/runs/42300761466)
-(commit `7f38aa4`) first exercised the release variant, and debug run
+Earlier runs: [42494393139](https://github.com/xdanther/Navidrome-TV/actions/runs/42494393139)
+(commit `8d873e8`) covered the 10-foot layout pass, and
 [42297506307](https://github.com/xdanther/Navidrome-TV/actions/runs/42297506307)
 covered the Subsonic envelope, cover-art fallback and Media3 callback fixes.
 
