@@ -1,5 +1,7 @@
 package com.navidrometv.core.designsystem.component
 
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -9,8 +11,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -26,7 +26,6 @@ import androidx.tv.material3.Text
 import com.navidrometv.core.common.Formatters
 import com.navidrometv.core.designsystem.theme.AppType
 import com.navidrometv.core.designsystem.theme.Dimens
-import com.navidrometv.core.designsystem.theme.LocalAppColors
 import com.navidrometv.core.designsystem.theme.NavidromeColors
 import com.navidrometv.core.designsystem.theme.Space
 import com.navidrometv.core.model.Album
@@ -35,16 +34,16 @@ import com.navidrometv.core.model.Genre
 import com.navidrometv.core.model.Playlist
 
 /**
- * Album card: artwork plus two lines of metadata. The card never changes its
- * measured size on focus; only the graphics layer scales, so carousels never
- * reflow while the user moves through them.
+ * Album card: square artwork with a two-line caption, the standard TV media card.
+ * Focus scales the card and draws a white outline; the artwork itself is never
+ * washed out or recoloured, so covers keep their true colours.
  */
 @Composable
 fun AlbumCard(
     album: Album,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    width: Dp = Space.cardWidth,
+    width: Dp = Space.cardArtwork,
     subtitleOverride: String? = null,
 ) {
     Column(modifier = modifier.width(width)) {
@@ -52,30 +51,28 @@ fun AlbumCard(
             onClick = onClick,
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(Dimens.cardCorner),
-        ) { focused ->
-            val highlight by animateFloatAsState(
-                targetValue = if (focused) 1f else 0f,
-                animationSpec = tween(durationMillis = 150),
-                label = "album-focus",
+        ) {
+            Artwork(
+                coverArtId = album.coverArtId,
+                contentDescription = "${album.name} cover",
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .aspectRatio(1f),
+                shape = RoundedCornerShape(Dimens.cardCorner),
             )
-            Box {
-                Artwork(
-                    coverArtId = album.coverArtId,
-                    contentDescription = "${album.name} cover",
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .aspectRatio(1f),
-                    shape = RoundedCornerShape(Dimens.cardCorner),
+            // A focused cover lifts a little in brightness: on very dark artwork the
+            // outline alone would be the only cue.
+            val lift by animateFloatAsState(
+                targetValue = if (it) 1f else 0f,
+                animationSpec = tween(durationMillis = 150),
+                label = "album-lift",
+            )
+            if (lift > 0.01f) {
+                Box(
+                    Modifier
+                        .matchParentSize()
+                        .background(Color.White.copy(alpha = 0.08f * lift)),
                 )
-                // A focused cover lifts its own brightness as well as the ring, so
-                // the cue survives dark artwork and sits well beyond a thin outline.
-                if (highlight > 0.01f) {
-                    Box(
-                        Modifier
-                            .matchParentSize()
-                            .background(Color.White.copy(alpha = 0.14f * highlight)),
-                    )
-                }
             }
         }
         Text(
@@ -84,12 +81,12 @@ fun AlbumCard(
             color = NavidromeColors.OnSurface,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.padding(top = Space.xs),
+            modifier = Modifier.padding(top = 10.dp),
         )
         Text(
             text = subtitleOverride ?: album.artistName.orEmpty(),
             style = AppType.cardSubtitle,
-            color = LocalAppColors.current.secondaryText,
+            color = NavidromeColors.OnSurfaceMuted,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
         )
@@ -102,7 +99,7 @@ fun ArtistCard(
     artist: Artist,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    width: Dp = Space.cardWidth,
+    width: Dp = Space.cardArtwork,
 ) {
     Column(modifier = modifier.width(width), horizontalAlignment = Alignment.CenterHorizontally) {
         TvClickable(onClick = onClick, shape = RoundedCornerShape(percent = 50)) {
@@ -121,20 +118,20 @@ fun ArtistCard(
             color = NavidromeColors.OnSurface,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.padding(top = Space.xs),
+            modifier = Modifier.padding(top = 10.dp),
         )
         if (artist.albumCount != null) {
             Text(
                 text = Formatters.plural(artist.albumCount, "album"),
                 style = AppType.cardSubtitle,
-                color = LocalAppColors.current.secondaryText,
+                color = NavidromeColors.OnSurfaceMuted,
                 maxLines = 1,
             )
         }
     }
 }
 
-/** Wide playlist card with a gradient scrim, used on Home and Library. */
+/** Square playlist tile: cover art with a neutral scrim and the playlist name. */
 @Composable
 fun PlaylistCard(
     playlist: Playlist,
@@ -149,7 +146,7 @@ fun PlaylistCard(
                     .fillMaxWidth()
                     .aspectRatio(1f)
                     .clip(RoundedCornerShape(Dimens.cardCorner))
-                    .background(Brush.linearGradient(listOf(Color(0xFF3A2340), Color(0xFF1A1226)))),
+                    .background(Brush.linearGradient(listOf(NavidromeColors.SurfaceVariant, NavidromeColors.Surface))),
             ) {
                 Artwork(
                     coverArtId = playlist.coverArtId,
@@ -165,7 +162,7 @@ fun PlaylistCard(
                 Text(
                     text = playlist.name,
                     style = AppType.cardTitle,
-                    color = Color.White,
+                    color = NavidromeColors.OnSurface,
                     maxLines = 3,
                     overflow = TextOverflow.Ellipsis,
                     modifier = Modifier
@@ -177,13 +174,17 @@ fun PlaylistCard(
         Text(
             text = Formatters.plural(playlist.trackCount, "song"),
             style = AppType.cardSubtitle,
-            color = LocalAppColors.current.secondaryText,
-            modifier = Modifier.padding(top = Space.xs),
+            color = NavidromeColors.OnSurfaceMuted,
+            modifier = Modifier.padding(top = 10.dp),
         )
     }
 }
 
-/** Wide, colourful genre tile. */
+/**
+ * Genre tile. The tiles use quiet, desaturated gradient surfaces instead of a
+ * rainbow so the palette stays neutral; the label and album count carry the
+ * information.
+ */
 @Composable
 fun GenreCard(
     genre: Genre,
@@ -193,11 +194,11 @@ fun GenreCard(
     colorIndex: Int = 0,
 ) {
     val gradients = listOf(
-        listOf(Color(0xFFE23B4E), Color(0xFF7A1230)),
-        listOf(Color(0xFF2E6BE6), Color(0xFF122B6B)),
-        listOf(Color(0xFF13A37C), Color(0xFF0A3F31)),
-        listOf(Color(0xFFB03BE2), Color(0xFF3C1259)),
-        listOf(Color(0xFFE28A1E), Color(0xFF5C3207)),
+        listOf(Color(0xFF2C3440), Color(0xFF171A1E)),
+        listOf(Color(0xFF2A3536), Color(0xFF161B1B)),
+        listOf(Color(0xFF34302A), Color(0xFF1B1916)),
+        listOf(Color(0xFF2B2E38), Color(0xFF16181D)),
+        listOf(Color(0xFF2C332E), Color(0xFF171B18)),
     )
     val colors = gradients[colorIndex % gradients.size]
     TvClickable(onClick = onClick, modifier = modifier.width(width)) {
@@ -213,53 +214,23 @@ fun GenreCard(
                 Text(
                     text = genre.name,
                     style = AppType.section,
-                    color = Color.White,
+                    color = NavidromeColors.OnSurface,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
                 Text(
                     text = Formatters.plural(genre.albumCount, "album"),
                     style = AppType.cardSubtitle,
-                    color = Color.White.copy(alpha = 0.75f),
+                    color = NavidromeColors.OnSurfaceMuted,
                 )
             }
         }
     }
 }
 
-/** Compact square tile used for dense "recently played artists" rows. */
-@Composable
-fun SquareArtistCard(
-    artist: Artist,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-    width: Dp = 150.dp,
-) {
-    Column(modifier = modifier.width(width)) {
-        TvClickable(onClick = onClick) {
-            Artwork(
-                coverArtId = artist.coverArtId,
-                contentDescription = artist.name,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .aspectRatio(1f),
-                shape = RoundedCornerShape(percent = 50),
-            )
-        }
-        Text(
-            text = artist.name,
-            style = AppType.cardTitle,
-            color = NavidromeColors.OnSurface,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.padding(top = Space.xs),
-        )
-    }
-}
-
 /** Static placeholder tile that keeps carousel height stable while loading. */
 @Composable
-fun SkeletonTile(modifier: Modifier = Modifier, width: Dp = Space.cardWidth) {
+fun SkeletonTile(modifier: Modifier = Modifier, width: Dp = Space.cardArtwork) {
     Column(modifier.width(width)) {
         Box(
             Modifier
@@ -270,7 +241,7 @@ fun SkeletonTile(modifier: Modifier = Modifier, width: Dp = Space.cardWidth) {
         )
         Box(
             Modifier
-                .padding(top = Space.xs)
+                .padding(top = 10.dp)
                 .fillMaxWidth(0.7f)
                 .height(12.dp)
                 .clip(RoundedCornerShape(6.dp))

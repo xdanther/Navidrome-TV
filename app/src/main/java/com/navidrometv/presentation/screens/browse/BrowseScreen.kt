@@ -133,7 +133,7 @@ private fun DecadeCard(decade: Decade, onClick: () -> Unit) {
             modifier = Modifier
                 .fillMaxSize()
                 .background(
-                    Brush.linearGradient(listOf(Color(0xFF2A2A36), Color(0xFF14141A))),
+                    Brush.linearGradient(listOf(NavidromeColors.SurfaceElevated, NavidromeColors.Surface)),
                     RoundedCornerShape(Dimens.cardCorner),
                 )
                 .padding(Space.lg),

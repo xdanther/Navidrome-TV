@@ -62,7 +62,7 @@ fun OnboardingScreen(
                 .fillMaxSize()
                 .background(
                     Brush.linearGradient(
-                        listOf(Color(0xFF14101C), NavidromeColors.Ink, Color(0xFF0B0A10)),
+                        listOf(NavidromeColors.Surface, NavidromeColors.Ink, Color(0xFF08090A)),
                     ),
                 ),
             verticalAlignment = Alignment.CenterVertically,
@@ -215,7 +215,7 @@ private fun SetupField(
                 .background(NavidromeColors.SurfaceElevated, RoundedCornerShape(14.dp))
                 .border(
                     width = if (focused) 2.dp else 1.dp,
-                    color = if (focused) Color.White else NavidromeColors.Border,
+                    color = if (focused) Color.White else NavidromeColors.SurfaceVariant,
                     shape = RoundedCornerShape(14.dp),
                 )
                 .padding(horizontal = 16.dp, vertical = 14.dp)

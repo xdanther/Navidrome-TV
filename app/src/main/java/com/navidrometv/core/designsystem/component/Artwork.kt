@@ -35,11 +35,11 @@ private val NoCoverArtUrl: (String?, Int) -> String? = { _, _ -> null }
 val LocalCoverArtUrl = staticCompositionLocalOf { NoCoverArtUrl }
 
 private val PlaceholderGradients = listOf(
-    listOf(Color(0xFF2B1B4A), Color(0xFF0F0D1A)),
-    listOf(Color(0xFF3D1236), Color(0xFF120B16)),
-    listOf(Color(0xFF12303D), Color(0xFF0A1216)),
-    listOf(Color(0xFF3A2410), Color(0xFF140D07)),
-    listOf(Color(0xFF1B2C1E), Color(0xFF0A100B)),
+    listOf(Color(0xFF2A2C30), Color(0xFF17181B)),
+    listOf(Color(0xFF2E3438), Color(0xFF17191B)),
+    listOf(Color(0xFF262E36), Color(0xFF141719)),
+    listOf(Color(0xFF33302B), Color(0xFF1A1917)),
+    listOf(Color(0xFF2B332D), Color(0xFF161A17)),
 )
 
 private fun gradientFor(seed: String?): Brush {

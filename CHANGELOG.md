@@ -25,6 +25,11 @@ All notable changes to this project are documented here. The format follows
 
 ### Changed
 
+- Reworked the visual language to the Android TV design guidance and retired the
+  purple/red art direction: neutral charcoal Material surfaces, one Google-blue
+  accent reserved for state, Roboto TV type scale, 48dp/27dp overscan-safe margins,
+  and 12dp card corners. Focus is now a 1.05x scale plus a 2dp white outline and a
+  surface change, and the top navigation is TV tabs with an accent underline.
 - Redesigned the 10-foot presentation: focus is now a filled, high-contrast
   treatment with an animated ring and 1.06x scale instead of a thin outline, and the
   top navigation collapses with an animation once Home is scrolled past its first

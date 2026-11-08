@@ -486,8 +486,8 @@ private fun PlaybackBackground(
                     Brush.verticalGradient(
                         listOf(
                             colors.background.copy(alpha = 0.72f),
-                            Color(0xF20A0A0F),
-                            Color(0xFF08080A),
+                            Color(0xF20E0F11),
+                            Color(0xFF0E0F11),
                         ),
                     ),
                 ),
@@ -643,7 +643,7 @@ private fun AudioInfoPanel(track: Track, info: AudioPlaybackInfo?, quality: Stre
     Column(
         modifier = Modifier
             .padding(top = Space.md)
-            .background(Color.White.copy(alpha = 0.05f), RoundedCornerShape(14.dp))
+            .background(NavidromeColors.SurfaceVariant.copy(alpha = 0.55f)),
             .padding(horizontal = Space.md, vertical = Space.sm),
         verticalArrangement = Arrangement.spacedBy(2.dp),
     ) {
@@ -828,7 +828,7 @@ private fun AmbientOverlay(
                 Brush.radialGradient(
                     listOf(
                         colors.dominant.copy(alpha = 0.35f),
-                        Color(0xFF050507),
+                        Color(0xFF0E0F11),
                     ),
                 ),
             ),

@@ -35,9 +35,9 @@ data class ArtworkColors(
 )
 
 val DefaultArtworkColors = ArtworkColors(
-    vibrant = Color(0xFF7B3FA0),
-    dominant = Color(0xFF2B1B4A),
-    background = Color(0xFF0B0A12),
+    vibrant = Color(0xFF8AB4F8),
+    dominant = Color(0xFF2A2C30),
+    background = Color(0xFF101113),
 )
 
 private val PaletteCache = LruCache<String, ArtworkColors>(24)
