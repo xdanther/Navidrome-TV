@@ -48,6 +48,10 @@ All notable changes to this project are documented here. The format follows
 
 ### Fixed
 
+- Release APKs no longer change signing certificate on every CI run, which made
+  Android refuse an update over an already installed build. CI now restores a
+  persisted keystore, and the pipeline fails if the APK's certificate does not match
+  it. Repository secrets can supply a permanent key instead.
 - Subsonic responses are unwrapped once in `SubsonicService`, so every repository
   call sees the payload instead of the envelope.
 - Cover-art fallbacks only add the `al-`/`ar-` prefix when the id does not carry it,

@@ -67,10 +67,16 @@ gradle :app:testReleaseUnitTest    # JVM unit tests
 gradle :app:lintRelease            # Android lint
 ```
 
-The release build is signed with the debug key unless `RELEASE_STORE_FILE`,
-`RELEASE_STORE_PASSWORD`, `RELEASE_KEY_ALIAS` and `RELEASE_KEY_PASSWORD` are set in
-the environment, which makes the APK installable for sideloading but not suitable
-for store distribution.
+Release APKs keep a single signing identity so a new build installs over the old
+one. CI restores a keystore from the Actions cache, generating it on the first run
+and reusing it afterwards, and the build fails if the APK ends up with a different
+certificate.
+
+For a key that survives cache eviction and branch changes, add these repository
+secrets (Settings → Secrets and variables → Actions): `RELEASE_KEYSTORE_BASE64`
+(base64 of a `.jks` file), `RELEASE_STORE_PASSWORD`, `RELEASE_KEY_ALIAS` and
+optionally `RELEASE_KEY_PASSWORD`. They take precedence over the cached key. A local
+build without the `RELEASE_*` variables falls back to the debug key.
 
 `gradlew` is intentionally not committed (no wrapper jar in this repository); CI and
 local builds use the Gradle 8.9 distribution directly.

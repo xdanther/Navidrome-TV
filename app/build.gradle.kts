@@ -28,6 +28,9 @@ android {
         create("release") {
             val storePath = System.getenv("RELEASE_STORE_FILE")
             if (storePath != null) {
+                require(file(storePath).exists()) {
+                    "RELEASE_STORE_FILE points to a missing keystore: $storePath"
+                }
                 storeFile = file(storePath)
                 storePassword = System.getenv("RELEASE_STORE_PASSWORD")
                 keyAlias = System.getenv("RELEASE_KEY_ALIAS")

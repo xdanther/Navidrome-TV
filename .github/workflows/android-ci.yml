@@ -41,6 +41,41 @@ jobs:
           gradle-version: "8.9"
           cache-read-only: false
 
+      # The release APK must keep one signing identity between builds, otherwise an
+      # update cannot be installed over the previous version. The key lives in the
+      # Actions cache; a repository secret takes precedence when it is configured.
+      - name: Restore signing key
+        uses: actions/cache@v4
+        with:
+          path: .signing
+          key: navidrome-tv-signing-v1
+
+      - name: Prepare release signing
+        env:
+          RELEASE_KEYSTORE_BASE64: ${{ secrets.RELEASE_KEYSTORE_BASE64 }}
+          RELEASE_STORE_PASSWORD: ${{ secrets.RELEASE_STORE_PASSWORD }}
+          RELEASE_KEY_ALIAS: ${{ secrets.RELEASE_KEY_ALIAS }}
+        run: |
+          set -euo pipefail
+          mkdir -p .signing
+          PASS="${RELEASE_STORE_PASSWORD:-navidrome-tv-sideload}"
+          ALIAS="${RELEASE_KEY_ALIAS:-navidrometv}"
+          if [ -n "${RELEASE_KEYSTORE_BASE64:-}" ]; then
+            printf '%s' "$RELEASE_KEYSTORE_BASE64" | base64 -d > .signing/release.jks
+            echo "::notice::Signing key source: RELEASE_KEYSTORE_BASE64 secret"
+          elif [ -f .signing/release.jks ]; then
+            echo "::notice::Signing key source: existing key restored from cache"
+          else
+            keytool -genkeypair -keystore .signing/release.jks -alias "$ALIAS" \
+              -keyalg RSA -keysize 2048 -validity 10000 \
+              -storepass "$PASS" -keypass "$PASS" \
+              -dname "CN=Navidrome TV, OU=Sideload, O=Navidrome TV, C=US"
+            echo "::notice::Signing key source: newly generated (cached for later runs)"
+          fi
+          SHA=$(keytool -list -v -keystore .signing/release.jks -storepass "$PASS" -alias "$ALIAS" \
+            | grep -m1 'SHA256:' | sed 's/.*SHA256: //' | tr -d ':' | tr 'A-Z' 'a-z')
+          echo "::notice title=Signing key certificate SHA-256::$SHA"
+
       - name: Unit tests
         run: |
           set -o pipefail
@@ -54,9 +89,37 @@ jobs:
 
       - name: Assemble release APK
         if: success()
+        env:
+          RELEASE_STORE_FILE: ${{ github.workspace }}/.signing/release.jks
+          RELEASE_STORE_PASSWORD: ${{ secrets.RELEASE_STORE_PASSWORD || 'navidrome-tv-sideload' }}
+          RELEASE_KEY_ALIAS: ${{ secrets.RELEASE_KEY_ALIAS || 'navidrometv' }}
+          RELEASE_KEY_PASSWORD: ${{ secrets.RELEASE_STORE_PASSWORD || 'navidrome-tv-sideload' }}
         run: |
           set -o pipefail
           gradle :app:assembleRelease --no-daemon --stacktrace --console=plain 2>&1 | tee /tmp/assemble.log
+
+      # Fails the build if the APK was signed with a different certificate than the
+      # key CI prepared, which is the failure users see as "signature always different".
+      - name: Verify APK signature
+        if: success()
+        env:
+          RELEASE_STORE_PASSWORD: ${{ secrets.RELEASE_STORE_PASSWORD || 'navidrome-tv-sideload' }}
+          RELEASE_KEY_ALIAS: ${{ secrets.RELEASE_KEY_ALIAS || 'navidrometv' }}
+        run: |
+          set -euo pipefail
+          APK=$(ls app/build/outputs/apk/release/*.apk | head -n1)
+          BUILD_TOOLS=$(ls "$ANDROID_HOME/build-tools" | sort -V | tail -n1)
+          KEY_SHA=$(keytool -list -v -keystore .signing/release.jks \
+            -storepass "$RELEASE_STORE_PASSWORD" -alias "$RELEASE_KEY_ALIAS" \
+            | grep -m1 'SHA256:' | sed 's/.*SHA256: //' | tr -d ':' | tr 'A-Z' 'a-z')
+          APK_SHA=$("$ANDROID_HOME/build-tools/$BUILD_TOOLS/apksigner" verify --print-certs "$APK" \
+            | grep -m1 'SHA-256 digest:' | sed 's/.*digest: //' | tr -d ':' | tr 'A-Z' 'a-z')
+          echo "::notice title=APK certificate SHA-256::$APK_SHA"
+          if [ "$KEY_SHA" != "$APK_SHA" ]; then
+            echo "::error::APK certificate ($APK_SHA) does not match the signing key ($KEY_SHA)"
+            exit 1
+          fi
+          echo "::notice::APK matches the prepared signing key"
 
       # Logs are not readable without a GitHub session, so surface the actual
       # compiler/test errors as annotations, which are visible on the run page.
