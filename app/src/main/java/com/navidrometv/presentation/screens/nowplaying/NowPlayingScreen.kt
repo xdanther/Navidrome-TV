@@ -643,7 +643,7 @@ private fun AudioInfoPanel(track: Track, info: AudioPlaybackInfo?, quality: Stre
     Column(
         modifier = Modifier
             .padding(top = Space.md)
-            .background(NavidromeColors.SurfaceVariant.copy(alpha = 0.55f)),
+            .background(NavidromeColors.SurfaceVariant.copy(alpha = 0.55f))
             .padding(horizontal = Space.md, vertical = Space.sm),
         verticalArrangement = Arrangement.spacedBy(2.dp),
     ) {
