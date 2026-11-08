@@ -28,12 +28,12 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.graphics.drawscope.drawOutline
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.graphics.translate
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -89,15 +89,15 @@ fun TvClickable(
                 drawContent()
                 if (ring > 0.01f) {
                     val stroke = ringWidth.toPx() * ring
-                    val outline = shape.createOutline(
-                        Size(size.width + stroke, size.height + stroke),
-                        layoutDirection,
-                        this,
-                    )
-                    drawContext.canvas.translate(-stroke / 2f, -stroke / 2f)
-                    drawOutline(
-                        outline = outline,
+                    val radius = when (shape) {
+                        is RoundedCornerShape -> shape.topStart.toPx(size, this)
+                        else -> size.minDimension / 2f
+                    }
+                    drawRoundRect(
                         color = NavidromeColors.Focus.copy(alpha = ring),
+                        topLeft = Offset(-stroke / 2f, -stroke / 2f),
+                        size = Size(size.width + stroke, size.height + stroke),
+                        cornerRadius = CornerRadius(radius + stroke / 2f),
                         style = Stroke(width = stroke),
                     )
                 }
