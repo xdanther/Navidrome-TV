@@ -20,7 +20,6 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
-import androidx.compose.material.icons.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.Favorite
 import androidx.compose.material.icons.rounded.FavoriteBorder
 import androidx.compose.material.icons.rounded.PlayArrow
@@ -34,8 +33,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.tv.material3.Text
@@ -100,7 +102,6 @@ fun AlbumScreen(
                     favoritePending = state.favoritePending,
                     currentTrackId = playback.currentTrack?.id,
                     isPlaying = playback.isPlaying,
-                    onBack = onBack,
                     onOpenArtist = onOpenArtist,
                     onPlay = viewModel::play,
                     onShuffle = viewModel::shuffle,
@@ -152,7 +153,6 @@ private fun AlbumDetailLayout(
     favoritePending: Boolean,
     currentTrackId: String?,
     isPlaying: Boolean,
-    onBack: () -> Unit,
     onOpenArtist: (String) -> Unit,
     onPlay: (Int) -> Unit,
     onShuffle: () -> Unit,
@@ -164,63 +164,52 @@ private fun AlbumDetailLayout(
     BoxWithConstraints(
         modifier = Modifier
             .fillMaxSize()
-            .padding(horizontal = Space.screenHorizontal, vertical = Space.screenTop),
+            .padding(start = Space.screenHorizontal, end = Space.screenHorizontal, top = Space.md),
     ) {
-        val artworkSize = minOf(maxHeight * 0.46f, maxWidth * 0.3f).coerceIn(150.dp, 320.dp)
+        // Cover on the left, everything else top-aligned beside it: title, artist,
+        // metadata, the action row, then the track list filling the column.
+        val artworkSize = minOf(maxWidth * 0.30f, maxHeight * 0.70f).coerceIn(150.dp, 340.dp)
+        val coverShape = RoundedCornerShape(8.dp)
 
         Row(
             modifier = Modifier.fillMaxSize(),
             horizontalArrangement = Arrangement.spacedBy(Space.xl),
         ) {
-            Column(Modifier.width(artworkSize)) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    CircleIconButton(
-                        icon = Icons.Rounded.ArrowBack,
-                        contentDescription = "Back",
-                        onClick = onBack,
-                        size = 44,
-                    )
-                    Text(
-                        text = "ALBUM",
-                        style = AppType.overline,
-                        color = NavidromeColors.OnSurfaceMuted,
-                        modifier = Modifier.padding(start = Space.sm),
-                    )
-                }
+            Artwork(
+                coverArtId = detail.album.coverArtId,
+                contentDescription = "${detail.album.name} cover",
+                modifier = Modifier
+                    .size(artworkSize)
+                    .shadow(
+                        22.dp,
+                        coverShape,
+                        ambientColor = Color.Black.copy(alpha = 0.16f),
+                        spotColor = Color.Black.copy(alpha = 0.24f),
+                    ),
+                shape = coverShape,
+                requestSizePx = 800,
+            )
 
-                Artwork(
-                    coverArtId = detail.album.coverArtId,
-                    contentDescription = "${detail.album.name} cover",
-                    modifier = Modifier
-                        .padding(top = Space.sm)
-                        .size(artworkSize),
-                    shape = RoundedCornerShape(Dimens.panelCorner),
-                    requestSizePx = 800,
-                )
-
+            Column(Modifier.weight(1f).fillMaxHeight()) {
                 Text(
                     text = detail.album.name,
-                    style = AppType.section,
+                    style = AppType.display,
                     color = NavidromeColors.OnSurface,
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.padding(top = Space.sm),
                 )
-
                 TvClickable(
                     onClick = { detail.album.artistId?.let(onOpenArtist) },
                     shape = RoundedCornerShape(6.dp),
                 ) {
                     Text(
                         text = detail.album.artistName.orEmpty(),
-                        style = AppType.bodyMuted,
-                        color = NavidromeColors.Accent,
+                        style = AppType.body.copy(fontSize = 22.sp),
+                        color = NavidromeColors.OnSurfaceMuted,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier.padding(vertical = 2.dp),
                     )
                 }
-
                 Text(
                     text = albumMetadata(
                         detail.album.year,
@@ -230,13 +219,15 @@ private fun AlbumDetailLayout(
                     ),
                     style = AppType.cardSubtitle,
                     color = LocalAppColors.current.secondaryText,
-                    maxLines = 2,
+                    maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.padding(top = 2.dp),
                 )
-            }
 
-            Column(Modifier.weight(1f).fillMaxHeight()) {
                 Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = Space.lg),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(Space.sm),
                 ) {
@@ -251,6 +242,7 @@ private fun AlbumDetailLayout(
                         icon = Icons.Rounded.Shuffle,
                         primary = false,
                     )
+                    Box(Modifier.weight(1f))
                     CircleIconButton(
                         icon = if (detail.album.isFavorite) {
                             Icons.Rounded.Favorite
@@ -263,33 +255,34 @@ private fun AlbumDetailLayout(
                             "Favorite album"
                         },
                         onClick = onToggleAlbumFavorite,
-                        size = 48,
-                        tint = if (detail.album.isFavorite) NavidromeColors.Accent else NavidromeColors.OnSurface,
+                        size = 44,
+                        tint = if (detail.album.isFavorite) {
+                            NavidromeColors.Accent
+                        } else {
+                            NavidromeColors.OnSurfaceMuted
+                        },
                         enabled = !favoritePending,
-                    )
-                    CircleIconButton(
-                        icon = Icons.Rounded.QueueMusic,
-                        contentDescription = "Add album to queue",
-                        onClick = onQueue,
-                        size = 48,
                     )
                     CircleIconButton(
                         icon = Icons.Rounded.Add,
                         contentDescription = "Add album to playlist",
                         onClick = onAddToPlaylist,
-                        size = 48,
+                        size = 44,
+                        tint = NavidromeColors.OnSurfaceMuted,
+                    )
+                    CircleIconButton(
+                        icon = Icons.Rounded.QueueMusic,
+                        contentDescription = "Add album to queue",
+                        onClick = onQueue,
+                        size = 44,
+                        tint = NavidromeColors.OnSurfaceMuted,
                     )
                 }
 
-                Text(
-                    text = "${detail.tracks.size} tracks",
-                    style = AppType.overline,
-                    color = NavidromeColors.OnSurfaceMuted,
-                    modifier = Modifier.padding(top = Space.md, bottom = Space.xs),
-                )
-
                 LazyColumn(
-                    modifier = Modifier.weight(1f),
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(top = Space.md),
                     contentPadding = PaddingValues(bottom = Space.contentBottomWithPlayer),
                 ) {
                     itemsIndexed(detail.tracks, key = { _, track -> track.id }) { index, track ->
