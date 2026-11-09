@@ -2,6 +2,7 @@ package com.navidrometv.core.designsystem.component
 
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.aspectRatio
@@ -59,6 +60,7 @@ fun PosterCard(
     subtitle: String? = null,
     eyebrow: String? = null,
     width: Dp = Space.cardPoster,
+    footerColor: Color = FooterBand,
 ) {
     var focused by remember { mutableStateOf(false) }
     val lift by animateDpAsState(
@@ -86,19 +88,28 @@ fun PosterCard(
                 .shadow(lift, shape, ambientColor = LiftAmbient, spotColor = LiftSpot),
             shape = shape,
         ) {
-            Box(modifier = Modifier.fillMaxSize()) {
+            // Square artwork on top (2:3 card = 2 thirds art, 1 third colour), so
+            // covers are never cropped; the remaining third is the album's own
+            // colour carrying the title.
+            Column(modifier = Modifier.fillMaxSize()) {
                 Artwork(
                     coverArtId = coverArtId,
                     contentDescription = contentDescription,
-                    modifier = Modifier.fillMaxSize(),
-                    shape = shape,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .aspectRatio(1f),
+                    shape = RoundedCornerShape(
+                        topStart = Dimens.cardCorner,
+                        topEnd = Dimens.cardCorner,
+                    ),
                 )
                 Column(
                     modifier = Modifier
-                        .align(Alignment.BottomCenter)
                         .fillMaxWidth()
-                        .background(FooterBand)
-                        .padding(horizontal = Space.md, vertical = 14.dp),
+                        .weight(1f)
+                        .background(footerColor)
+                        .padding(horizontal = Space.md, vertical = Space.xs),
+                    verticalArrangement = Arrangement.Center,
                 ) {
                     Text(
                         text = title,

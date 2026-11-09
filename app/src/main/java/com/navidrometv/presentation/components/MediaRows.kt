@@ -11,6 +11,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.tv.material3.Text
@@ -27,6 +29,7 @@ import com.navidrometv.core.model.Album
 import com.navidrometv.core.model.Artist
 import com.navidrometv.core.model.Genre
 import com.navidrometv.core.model.Playlist
+import com.navidrometv.presentation.common.rememberArtworkColors
 
 /**
  * Square album carousel. Every card shares one artwork size, so rows read as a
@@ -71,6 +74,7 @@ fun PosterRow(
         SectionHeader(title = title, subtitle = subtitle, modifier = rowHeaderModifier(bleed))
         RowCarousel(bleed = bleed, spacing = Space.xl) {
             items(albums, key = { it.id }) { album ->
+                val artworkColors = rememberArtworkColors(album.coverArtId)
                 PosterCard(
                     coverArtId = album.coverArtId,
                     contentDescription = "${album.name} cover",
@@ -78,6 +82,9 @@ fun PosterRow(
                     subtitle = posterSubtitle(album),
                     eyebrow = album.genre?.takeIf { it.isNotBlank() } ?: album.artistName,
                     onClick = { onOpenAlbum(album.id) },
+                    // The footer takes the album's dominant colour, darkened so the
+                    // white title always reads.
+                    footerColor = lerp(artworkColors.dominant, Color.Black, 0.45f),
                 )
             }
         }
