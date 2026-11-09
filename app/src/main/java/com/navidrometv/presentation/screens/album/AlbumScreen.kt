@@ -34,7 +34,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -161,9 +163,21 @@ private fun AlbumDetailLayout(
     onToggleTrackFavorite: (Track) -> Unit,
     onAddToPlaylist: () -> Unit,
 ) {
+    // The page is tinted by the album's own dominant colour and falls off to black,
+    // the same depth cue Apple Music uses on a detail page, so the cover sits in its
+    // own light instead of on a flat rectangle.
+    val palette = com.navidrometv.presentation.common.rememberArtworkColors(detail.album.coverArtId)
     BoxWithConstraints(
         modifier = Modifier
             .fillMaxSize()
+            .background(
+                Brush.verticalGradient(
+                    listOf(
+                        lerp(palette.dominant, Color.Black, 0.74f),
+                        Color.Black,
+                    ),
+                ),
+            )
             .padding(start = Space.screenHorizontal, end = Space.screenHorizontal, top = Space.md),
     ) {
         // Cover on the left, everything else top-aligned beside it: title, artist,

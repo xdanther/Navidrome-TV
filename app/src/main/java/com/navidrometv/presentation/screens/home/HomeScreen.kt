@@ -90,7 +90,7 @@ private fun HomeContent(
             top = Space.md,
             bottom = Space.contentBottomWithPlayer,
         ),
-        verticalArrangement = Arrangement.spacedBy(Space.md),
+        verticalArrangement = Arrangement.spacedBy(Space.lg),
     ) {
         // No greeting block and no hero: the page starts on its first shelf, the
         // way Apple Music's Home does.
