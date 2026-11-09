@@ -129,14 +129,14 @@ object AppType {
     val cardTitle = TextStyle(
         fontFamily = Family,
         fontWeight = FontWeight.SemiBold,
-        fontSize = 18.sp,
-        lineHeight = 24.sp,
+        fontSize = 16.sp,
+        lineHeight = 21.sp,
     )
     val cardSubtitle = TextStyle(
         fontFamily = Family,
         fontWeight = FontWeight.Normal,
-        fontSize = 15.sp,
-        lineHeight = 20.sp,
+        fontSize = 13.sp,
+        lineHeight = 17.sp,
     )
     val body = TextStyle(
         fontFamily = Family,
@@ -191,16 +191,18 @@ object Space {
     val contentBottomWithPlayer = 136.dp
     val cardWidth = 200.dp
     val cardArtwork = 200.dp
+    val cardPoster = 204.dp
     val rowSpacing = 24.dp
     val topBarHeight = 72.dp
 }
 
 object Dimens {
-    val cardCorner = 12.dp
+    val cardCorner = 6.dp
     val panelCorner = 16.dp
     val pillCorner = 100.dp
     val focusBorderWidth = 6.dp
     val cardElevation = 10.dp
+    val focusElevation = 22.dp
     val floatingElevation = 20.dp
     const val FOCUS_SCALE = 1.10f
 }

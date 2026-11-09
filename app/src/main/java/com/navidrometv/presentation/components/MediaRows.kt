@@ -11,12 +11,14 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.tv.material3.Text
 import com.navidrometv.core.designsystem.component.AlbumCard
 import com.navidrometv.core.designsystem.component.ArtistCard
 import com.navidrometv.core.designsystem.component.GenreCard
 import com.navidrometv.core.designsystem.component.PlaylistCard
+import com.navidrometv.core.designsystem.component.PosterCard
 import com.navidrometv.core.designsystem.component.SectionHeader
 import com.navidrometv.core.designsystem.theme.AppType
 import com.navidrometv.core.designsystem.theme.LocalAppColors
@@ -50,6 +52,42 @@ fun AlbumRow(
         }
     }
 }
+
+/**
+ * Editorial carousel of 2:3 poster cards: the tall "picks" shelf, where each card
+ * carries its title in a footer band and an eyebrow label above the art.
+ */
+@Composable
+fun PosterRow(
+    title: String,
+    albums: List<Album>,
+    onOpenAlbum: (String) -> Unit,
+    modifier: Modifier = Modifier,
+    subtitle: String? = null,
+    bleed: Boolean = false,
+) {
+    if (albums.isEmpty()) return
+    Column(modifier = modifier.fillMaxWidth()) {
+        SectionHeader(title = title, subtitle = subtitle, modifier = rowHeaderModifier(bleed))
+        RowCarousel(bleed = bleed, spacing = Space.xl) {
+            items(albums, key = { it.id }) { album ->
+                PosterCard(
+                    coverArtId = album.coverArtId,
+                    contentDescription = "${album.name} cover",
+                    title = album.name,
+                    subtitle = posterSubtitle(album),
+                    eyebrow = album.genre?.takeIf { it.isNotBlank() } ?: album.artistName,
+                    onClick = { onOpenAlbum(album.id) },
+                )
+            }
+        }
+    }
+}
+
+private fun posterSubtitle(album: Album): String =
+    listOfNotNull(album.artistName, album.year?.toString())
+        .distinct()
+        .joinToString(" · ")
 
 @Composable
 fun ArtistRow(
@@ -129,12 +167,13 @@ private fun rowHeaderModifier(bleed: Boolean): Modifier =
 @Composable
 private fun RowCarousel(
     bleed: Boolean = false,
+    spacing: Dp = Space.lg,
     content: androidx.compose.foundation.lazy.LazyListScope.() -> Unit,
 ) {
     val side = if (bleed) Space.screenHorizontal else 6.dp
     LazyRow(
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(Space.lg),
+        horizontalArrangement = Arrangement.spacedBy(spacing),
         contentPadding = PaddingValues(start = side, end = side, top = 18.dp, bottom = 18.dp),
         content = content,
     )

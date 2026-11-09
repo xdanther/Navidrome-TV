@@ -25,6 +25,14 @@ All notable changes to this project are documented here. The format follows
 
 ### Changed
 
+- Media cards follow the reference shelf: a 2:3 editorial poster card carries its
+  title in a solid footer band inside the artwork with an eyebrow label above it,
+  and the square album, artist and playlist cards now use a centred two-line
+  caption at 16/13sp instead of a single truncated line at 18/15sp. Corners are
+  sharper (6dp) and tiles are flat at rest, lifting with a floating shadow only
+  while focused.
+- Home opens with a "Top Picks for You" poster shelf built from the server's
+  random selection, replacing the plain Discover row further down the page.
 - Focus is now unmistakable on the light stage: a 6dp two-tone ring (white band,
   dark edge) is drawn inside the element's own rounded shape, so nothing clips it
   away, and a focused item also darkens to an ink pill in the navigation and chips.

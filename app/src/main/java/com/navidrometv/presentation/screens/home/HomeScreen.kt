@@ -30,6 +30,7 @@ import com.navidrometv.presentation.components.ArtistRow
 import com.navidrometv.presentation.components.HideTopBarOnScroll
 import com.navidrometv.presentation.components.GenreRow
 import com.navidrometv.presentation.components.PlaylistRow
+import com.navidrometv.presentation.components.PosterRow
 import com.navidrometv.playback.PlaybackState
 
 @Composable
@@ -102,6 +103,17 @@ private fun HomeContent(
                     text = if (state.hasHistory) "Picked up from your listening history" else "Fresh from your server",
                     style = AppType.bodyMuted,
                     color = NavidromeColors.OnSurfaceMuted,
+                )
+            }
+        }
+
+        if (state.discover.isNotEmpty()) {
+            item(key = "top-picks") {
+                PosterRow(
+                    title = "Top Picks for You",
+                    albums = state.discover,
+                    onOpenAlbum = onOpenAlbum,
+                    bleed = true,
                 )
             }
         }
@@ -187,12 +199,6 @@ private fun HomeContent(
         if (state.frequentlyPlayed.isNotEmpty()) {
             item(key = "frequent") {
                 AlbumRow(title = "On Repeat", albums = state.frequentlyPlayed, onOpenAlbum = onOpenAlbum, bleed = true)
-            }
-        }
-
-        if (state.discover.isNotEmpty()) {
-            item(key = "discover") {
-                AlbumRow(title = "Discover", albums = state.discover, onOpenAlbum = onOpenAlbum, bleed = true)
             }
         }
 
