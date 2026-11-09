@@ -25,6 +25,13 @@ All notable changes to this project are documented here. The format follows
 
 ### Changed
 
+- The whole skin is now the dark, artwork-led language Apple Music uses on Apple TV:
+  black canvas with a near-black backdrop, white type with a 60% secondary label,
+  Apple Music red reserved for playback state, a full-width translucent navigation
+  bar with left-aligned destinations and a flush full-width playback bar instead of
+  floating glass cards. Shelves use square covers with left-aligned captions on the
+  tvOS five-column grid (160dp cards, 20dp gaps, 40dp safe margins), and Home opens
+  directly on its first shelf with no greeting hero.
 - Now Playing is a single centred column like the reference player: album name at
   the top, a large square cover with a soft shadow, the track title with a playing
   indicator beside it, then a quiet transport row whose controls are transparent

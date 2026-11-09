@@ -92,17 +92,8 @@ private fun HomeContent(
         ),
         verticalArrangement = Arrangement.spacedBy(Space.md),
     ) {
-        // One compact line above the first shelf instead of a hero block: the
-        // reference page starts on its first heading, not on a greeting wall.
-        item(key = "greeting") {
-            Text(
-                text = greeting(),
-                style = AppType.section,
-                color = NavidromeColors.OnSurfaceMuted,
-                modifier = Modifier.padding(horizontal = Space.screenHorizontal),
-            )
-        }
-
+        // No greeting block and no hero: the page starts on its first shelf, the
+        // way Apple Music's Home does.
         if (state.discover.isNotEmpty()) {
             item(key = "top-picks") {
                 PosterRow(
@@ -238,12 +229,3 @@ private fun HomeContent(
     }
 }
 
-private fun greeting(): String {
-    val hour = java.util.Calendar.getInstance().get(java.util.Calendar.HOUR_OF_DAY)
-    return when {
-        hour < 6 -> "Good night"
-        hour < 12 -> "Good morning"
-        hour < 18 -> "Good afternoon"
-        else -> "Good evening"
-    }
-}

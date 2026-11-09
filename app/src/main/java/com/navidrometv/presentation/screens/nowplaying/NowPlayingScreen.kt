@@ -380,7 +380,7 @@ private fun NowPlayingContent(
                         onClick = onTogglePlay,
                         size = 76,
                         tint = NavidromeColors.Ink,
-                        background = NavidromeColors.Surface,
+                        background = Color.White,
                         modifier = Modifier.padding(horizontal = Space.xs),
                     )
                     CircleIconButton(
@@ -440,7 +440,7 @@ private fun NowPlayingContent(
                             },
                             modifier = Modifier
                                 .background(
-                                    if (focused) NavidromeColors.Surface else Color.Transparent,
+                                    if (focused) Color.White else Color.Transparent,
                                     RoundedCornerShape(Dimens.pillCorner),
                                 )
                                 .padding(horizontal = 14.dp, vertical = 8.dp),

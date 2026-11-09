@@ -3,7 +3,6 @@ package com.navidrometv.presentation.components
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -12,7 +11,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Search
@@ -21,8 +19,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
@@ -31,16 +27,16 @@ import androidx.tv.material3.Icon
 import androidx.tv.material3.Text
 import com.navidrometv.core.designsystem.component.TvClickable
 import com.navidrometv.core.designsystem.theme.AppType
-import com.navidrometv.core.designsystem.theme.Dimens
 import com.navidrometv.core.designsystem.theme.NavidromeColors
 import com.navidrometv.core.designsystem.theme.Space
 import com.navidrometv.presentation.navigation.Routes
 
 /**
- * Top navigation as a floating glass capsule: destinations sit in one row, the
- * current one is a solid white pill, and the utility icons close the capsule. It
- * floats over the ambient background instead of being a full-width bar, which keeps
- * the content the brightest thing on screen.
+ * Top navigation, laid out the way a television app expects it: a full-width row
+ * of destinations on the safe-area margin rather than a floating phone-style
+ * capsule. The current destination is bold white, the others sit at ~60% white,
+ * and focus resolves to a solid white pill with black type so the remote target is
+ * unmistakable from across the room.
  */
 @Composable
 fun TopBar(
@@ -50,57 +46,44 @@ fun TopBar(
     onOpenParty: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val capsule = RoundedCornerShape(percent = 50)
-    val shadow = Color.Black.copy(alpha = 0.12f)
-    Box(
+    Row(
         modifier = modifier
             .fillMaxWidth()
-            .padding(top = Space.md, bottom = Space.xs),
-        contentAlignment = Alignment.Center,
+            .padding(
+                start = Space.screenHorizontal,
+                end = Space.screenHorizontal,
+                top = Space.sm,
+                bottom = Space.xs,
+            )
+            .height(Space.topBarHeight),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(2.dp),
     ) {
-        Row(
-            modifier = Modifier
-                .shadow(Dimens.floatingElevation, capsule, ambientColor = shadow, spotColor = shadow)
-                .clip(capsule)
-                .background(NavidromeColors.Glass)
-                .border(1.dp, Color.White.copy(alpha = 0.7f), capsule)
-                .padding(horizontal = 8.dp, vertical = 6.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(2.dp),
-        ) {
-            navTabs.forEach { (route, label) ->
-                NavTab(
-                    label = label,
-                    selected = currentRoute == route,
-                    onClick = { onNavigate(route) },
-                )
-            }
-            Spacer(Modifier.width(Space.xs))
-            Box(
-                Modifier
-                    .width(1.dp)
-                    .height(22.dp)
-                    .background(NavidromeColors.Border),
+        navTabs.forEach { (route, label) ->
+            NavTab(
+                label = label,
+                selected = currentRoute == route,
+                onClick = { onNavigate(route) },
             )
-            Spacer(Modifier.width(Space.xs))
-            NavIcon(
-                icon = Icons.Rounded.Search,
-                contentDescription = "Search",
-                selected = currentRoute == Routes.SEARCH,
-                onClick = { onNavigate(Routes.SEARCH) },
-            )
-            NavIcon(
-                icon = Icons.Rounded.Settings,
-                contentDescription = "Settings",
-                selected = currentRoute == Routes.SETTINGS,
-                onClick = onOpenSettings,
-            )
-            NavTextChip(label = "PARTY", onClick = onOpenParty)
         }
+        Spacer(Modifier.weight(1f))
+        NavIcon(
+            icon = Icons.Rounded.Search,
+            contentDescription = "Search",
+            selected = currentRoute == Routes.SEARCH,
+            onClick = { onNavigate(Routes.SEARCH) },
+        )
+        NavIcon(
+            icon = Icons.Rounded.Settings,
+            contentDescription = "Settings",
+            selected = currentRoute == Routes.SETTINGS,
+            onClick = onOpenSettings,
+        )
+        NavTab(label = "Party", selected = currentRoute == Routes.PARTY, onClick = onOpenParty)
     }
 }
 
-/** Search lives in the capsule as an icon, so it is not repeated as a text tab. */
+/** Search lives in the bar as an icon, so it is not repeated as a text tab. */
 private val navTabs: List<Pair<String, String>> =
     Routes.topLevel.filterNot { it.first == Routes.SEARCH }
 
@@ -114,31 +97,30 @@ private fun NavTab(
     TvClickable(
         onClick = onClick,
         shape = pill,
-        focusedScale = 1.04f,
-        ringWidth = 4.dp,
+        focusedScale = 1.03f,
+        ringWidth = 3.dp,
     ) { focused ->
         val fill by animateColorAsState(
-            targetValue = when {
-                focused -> NavidromeColors.Ink
-                selected -> NavidromeColors.Surface
-                else -> Color.Transparent
-            },
+            targetValue = if (focused) Color.White else Color.Transparent,
             animationSpec = tween(durationMillis = 140),
             label = "nav-fill",
         )
         Text(
             text = label,
-            style = AppType.button.copy(
-                fontWeight = if (selected || focused) FontWeight.SemiBold else FontWeight.Normal,
+            style = AppType.bodyMuted.copy(
+                fontWeight = when {
+                    focused || selected -> FontWeight.SemiBold
+                    else -> FontWeight.Normal
+                },
             ),
             color = when {
-                focused -> Color.White
-                selected -> NavidromeColors.Ink
+                focused -> NavidromeColors.Ink
+                selected -> NavidromeColors.OnSurface
                 else -> NavidromeColors.OnSurfaceMuted
             },
             modifier = Modifier
                 .background(fill, pill)
-                .padding(horizontal = 18.dp, vertical = 9.dp),
+                .padding(horizontal = 16.dp, vertical = 8.dp),
         )
     }
 }
@@ -151,47 +133,28 @@ private fun NavIcon(
     onClick: () -> Unit,
 ) {
     val pill = RoundedCornerShape(percent = 50)
-    TvClickable(onClick = onClick, shape = pill, focusedScale = 1.04f, ringWidth = 4.dp) { focused ->
+    TvClickable(onClick = onClick, shape = pill, focusedScale = 1.03f, ringWidth = 3.dp) { focused ->
         val fill by animateColorAsState(
-            targetValue = when {
-                focused -> NavidromeColors.Ink
-                selected -> NavidromeColors.Surface
-                else -> Color.Transparent
-            },
+            targetValue = if (focused) Color.White else Color.Transparent,
             animationSpec = tween(durationMillis = 140),
             label = "nav-icon-fill",
         )
         Box(
             modifier = Modifier
                 .background(fill, pill)
-                .padding(horizontal = 12.dp, vertical = 9.dp),
+                .padding(horizontal = 12.dp, vertical = 10.dp),
             contentAlignment = Alignment.Center,
         ) {
             Icon(
                 imageVector = icon,
                 contentDescription = contentDescription,
                 tint = when {
-                    focused -> Color.White
-                    selected -> NavidromeColors.Ink
+                    focused -> NavidromeColors.Ink
+                    selected -> NavidromeColors.OnSurface
                     else -> NavidromeColors.OnSurfaceMuted
                 },
                 modifier = Modifier.size(20.dp),
             )
         }
-    }
-}
-
-@Composable
-private fun NavTextChip(label: String, onClick: () -> Unit) {
-    val pill = RoundedCornerShape(percent = 50)
-    TvClickable(onClick = onClick, shape = pill, focusedScale = 1.04f, ringWidth = 4.dp) { focused ->
-        Text(
-            text = label,
-            style = AppType.overline,
-            color = if (focused) Color.White else NavidromeColors.OnSurfaceMuted,
-            modifier = Modifier
-                .background(if (focused) NavidromeColors.Ink else Color.Transparent, pill)
-                .padding(horizontal = 12.dp, vertical = 12.dp),
-        )
     }
 }

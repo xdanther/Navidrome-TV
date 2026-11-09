@@ -101,7 +101,7 @@ private fun KeyButton(
             .then(if (wide) Modifier.size(width = 118.dp, height = 46.dp) else Modifier.size(62.dp))
             .background(
                 when {
-                    focused -> NavidromeColors.Surface
+                    focused -> Color.White
                     primary -> NavidromeColors.Accent
                     else -> NavidromeColors.SurfaceVariant.copy(alpha = 0.75f)
                 },

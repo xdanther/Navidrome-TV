@@ -258,7 +258,7 @@ private fun TextEntryOverlay(
                 Text(
                     text = value.ifEmpty { "…" },
                     style = AppType.body,
-                    color = NavidromeColors.Ink,
+                    color = NavidromeColors.OnSurface,
                 )
             }
             TvKeyboard(

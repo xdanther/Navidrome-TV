@@ -2,7 +2,6 @@ package com.navidrometv.core.designsystem.component
 
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.aspectRatio
@@ -38,17 +37,88 @@ import com.navidrometv.core.model.Artist
 import com.navidrometv.core.model.Genre
 import com.navidrometv.core.model.Playlist
 
-/** Solid footer band carried inside the editorial card, as on the reference shelf. */
-private val FooterBand = Color(0xE61A1917)
-
 /** Shadow colour used for the focused lift, so covers separate from each other. */
-private val LiftAmbient = Color.Black.copy(alpha = 0.18f)
-private val LiftSpot = Color.Black.copy(alpha = 0.28f)
+private val LiftAmbient = Color.Black.copy(alpha = 0.42f)
+private val LiftSpot = Color.Black.copy(alpha = 0.55f)
 
 /**
- * Editorial card: a 2:3 poster with a solid footer band carrying the title inside
- * the card, and an optional eyebrow label above it. This is the tall "made for
- * you" tile from the reference shelf, so the caption never hangs outside the art.
+ * Caption under a shelf tile: title on the first line, a quieter secondary line
+ * under it, both left-aligned to the artwork's leading edge the way Apple Music
+ * labels its shelves on Apple TV.
+ */
+@Composable
+private fun TileCaption(
+    title: String,
+    subtitle: String?,
+    modifier: Modifier = Modifier,
+    alignment: Alignment.Horizontal = Alignment.Start,
+) {
+    val textAlign = if (alignment == Alignment.CenterHorizontally) TextAlign.Center else TextAlign.Start
+    Column(modifier = modifier.padding(top = Space.xs)) {
+        Text(
+            text = title,
+            style = AppType.cardTitle,
+            color = NavidromeColors.OnSurface,
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis,
+            textAlign = textAlign,
+            modifier = Modifier.fillMaxWidth(),
+        )
+        if (!subtitle.isNullOrBlank()) {
+            Text(
+                text = subtitle,
+                style = AppType.cardSubtitle,
+                color = NavidromeColors.OnSurfaceMuted,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                textAlign = textAlign,
+                modifier = Modifier.fillMaxWidth(),
+            )
+        }
+    }
+}
+
+/**
+ * Square artwork tile: 1:1 cover, flat at rest, lifting only when focused.
+ * Apple Music on Apple TV uses square covers rather than posters, so nothing is
+ * ever cropped and shelves stay on one rhythm.
+ */
+@Composable
+private fun SquareArtTile(
+    coverArtId: String?,
+    contentDescription: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    shape: RoundedCornerShape = RoundedCornerShape(Dimens.cardCorner),
+    overlay: @Composable (() -> Unit)? = null,
+) {
+    var focused by remember { mutableStateOf(false) }
+    val lift by animateDpAsState(
+        targetValue = if (focused) Dimens.focusElevation else 0.dp,
+        label = "tile-lift",
+    )
+    TvClickable(
+        onClick = onClick,
+        onFocusChanged = { focused = it },
+        modifier = modifier
+            .fillMaxWidth()
+            .aspectRatio(1f)
+            .shadow(lift, shape, ambientColor = LiftAmbient, spotColor = LiftSpot),
+        shape = shape,
+    ) {
+        Artwork(
+            coverArtId = coverArtId,
+            contentDescription = contentDescription,
+            modifier = Modifier.fillMaxSize(),
+            shape = shape,
+        )
+        overlay?.invoke()
+    }
+}
+
+/**
+ * Shelf tile built from raw fields, so a "Top Picks" entry can be anything that
+ * has a cover and a name (album, mix, playlist) without inventing a card type.
  */
 @Composable
 fun PosterCard(
@@ -58,87 +128,19 @@ fun PosterCard(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     subtitle: String? = null,
-    eyebrow: String? = null,
     width: Dp = Space.cardPoster,
-    footerColor: Color = FooterBand,
 ) {
-    var focused by remember { mutableStateOf(false) }
-    val lift by animateDpAsState(
-        targetValue = if (focused) Dimens.focusElevation else 0.dp,
-        label = "poster-lift",
-    )
-    val shape = RoundedCornerShape(Dimens.cardCorner)
     Column(modifier = modifier.width(width)) {
-        if (!eyebrow.isNullOrBlank()) {
-            Text(
-                text = eyebrow,
-                style = AppType.cardSubtitle,
-                color = NavidromeColors.OnSurfaceMuted,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.padding(bottom = Space.xs, start = 2.dp),
-            )
-        }
-        TvClickable(
+        SquareArtTile(
+            coverArtId = coverArtId,
+            contentDescription = contentDescription,
             onClick = onClick,
-            onFocusChanged = { focused = it },
-            modifier = Modifier
-                .fillMaxWidth()
-                .aspectRatio(2f / 3f)
-                .shadow(lift, shape, ambientColor = LiftAmbient, spotColor = LiftSpot),
-            shape = shape,
-        ) {
-            // Square artwork on top (2:3 card = 2 thirds art, 1 third colour), so
-            // covers are never cropped; the remaining third is the album's own
-            // colour carrying the title.
-            Column(modifier = Modifier.fillMaxSize()) {
-                Artwork(
-                    coverArtId = coverArtId,
-                    contentDescription = contentDescription,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .aspectRatio(1f),
-                    shape = RoundedCornerShape(
-                        topStart = Dimens.cardCorner,
-                        topEnd = Dimens.cardCorner,
-                    ),
-                )
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .weight(1f)
-                        .background(footerColor)
-                        .padding(horizontal = Space.md, vertical = Space.xs),
-                    verticalArrangement = Arrangement.Center,
-                ) {
-                    Text(
-                        text = title,
-                        style = AppType.cardTitle,
-                        color = Color.White,
-                        maxLines = 2,
-                        overflow = TextOverflow.Ellipsis,
-                    )
-                    if (!subtitle.isNullOrBlank()) {
-                        Text(
-                            text = subtitle,
-                            style = AppType.cardSubtitle,
-                            color = Color.White.copy(alpha = 0.74f),
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                            modifier = Modifier.padding(top = 2.dp),
-                        )
-                    }
-                }
-            }
-        }
+        )
+        TileCaption(title = title, subtitle = subtitle)
     }
 }
 
-/**
- * Album card: square artwork with a centred two-line caption below it. There is no
- * shadow at rest — on the reference the grid is flat and only the focused tile
- * lifts — so focus both scales the card and gives it a floating shadow.
- */
+/** Album tile: square cover with the album name and artist beneath it. */
 @Composable
 fun AlbumCard(
     album: Album,
@@ -147,53 +149,20 @@ fun AlbumCard(
     width: Dp = Space.cardArtwork,
     subtitleOverride: String? = null,
 ) {
-    var focused by remember { mutableStateOf(false) }
-    val lift by animateDpAsState(
-        targetValue = if (focused) Dimens.focusElevation else 0.dp,
-        label = "album-lift",
-    )
-    val shape = RoundedCornerShape(Dimens.cardCorner)
-    Column(modifier = modifier.width(width), horizontalAlignment = Alignment.CenterHorizontally) {
-        TvClickable(
+    Column(modifier = modifier.width(width)) {
+        SquareArtTile(
+            coverArtId = album.coverArtId,
+            contentDescription = "${album.name} cover",
             onClick = onClick,
-            onFocusChanged = { focused = it },
-            modifier = Modifier
-                .fillMaxWidth()
-                .aspectRatio(1f)
-                .shadow(lift, shape, ambientColor = LiftAmbient, spotColor = LiftSpot),
-            shape = shape,
-        ) {
-            Artwork(
-                coverArtId = album.coverArtId,
-                contentDescription = "${album.name} cover",
-                modifier = Modifier.fillMaxSize(),
-                shape = shape,
-            )
-        }
-        Text(
-            text = album.name,
-            style = AppType.cardTitle,
-            color = NavidromeColors.OnSurface,
-            maxLines = 2,
-            overflow = TextOverflow.Ellipsis,
-            textAlign = TextAlign.Center,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 8.dp),
         )
-        Text(
-            text = subtitleOverride ?: album.artistName.orEmpty(),
-            style = AppType.cardSubtitle,
-            color = NavidromeColors.OnSurfaceMuted,
-            maxLines = 2,
-            overflow = TextOverflow.Ellipsis,
-            textAlign = TextAlign.Center,
-            modifier = Modifier.fillMaxWidth(),
+        TileCaption(
+            title = album.name,
+            subtitle = subtitleOverride ?: album.artistName.orEmpty(),
         )
     }
 }
 
-/** Artist card with the circular portrait used throughout the design. */
+/** Artist tile. Portraits stay circular, as Apple Music shows artists. */
 @Composable
 fun ArtistCard(
     artist: Artist,
@@ -201,54 +170,23 @@ fun ArtistCard(
     modifier: Modifier = Modifier,
     width: Dp = Space.cardArtwork,
 ) {
-    var focused by remember { mutableStateOf(false) }
-    val lift by animateDpAsState(
-        targetValue = if (focused) Dimens.focusElevation else 0.dp,
-        label = "artist-lift",
-    )
     val shape = RoundedCornerShape(percent = 50)
     Column(modifier = modifier.width(width), horizontalAlignment = Alignment.CenterHorizontally) {
-        TvClickable(
+        SquareArtTile(
+            coverArtId = artist.coverArtId,
+            contentDescription = "${artist.name} portrait",
             onClick = onClick,
-            onFocusChanged = { focused = it },
-            modifier = Modifier
-                .fillMaxWidth()
-                .aspectRatio(1f)
-                .shadow(lift, shape, ambientColor = LiftAmbient, spotColor = LiftSpot),
             shape = shape,
-        ) {
-            Artwork(
-                coverArtId = artist.coverArtId,
-                contentDescription = "${artist.name} portrait",
-                modifier = Modifier.fillMaxSize(),
-                shape = shape,
-            )
-        }
-        Text(
-            text = artist.name,
-            style = AppType.cardTitle,
-            color = NavidromeColors.OnSurface,
-            maxLines = 2,
-            overflow = TextOverflow.Ellipsis,
-            textAlign = TextAlign.Center,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 8.dp),
         )
-        if (artist.albumCount != null) {
-            Text(
-                text = Formatters.plural(artist.albumCount, "album"),
-                style = AppType.cardSubtitle,
-                color = NavidromeColors.OnSurfaceMuted,
-                maxLines = 1,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.fillMaxWidth(),
-            )
-        }
+        TileCaption(
+            title = artist.name,
+            subtitle = artist.albumCount?.let { Formatters.plural(it, "album") },
+            alignment = Alignment.CenterHorizontally,
+        )
     }
 }
 
-/** Square playlist tile: cover art with a neutral scrim and the playlist name. */
+/** Playlist tile. The name sits under the cover, not on top of it. */
 @Composable
 fun PlaylistCard(
     playlist: Playlist,
@@ -256,83 +194,38 @@ fun PlaylistCard(
     modifier: Modifier = Modifier,
     width: Dp = Space.cardArtwork,
 ) {
-    var focused by remember { mutableStateOf(false) }
-    val lift by animateDpAsState(
-        targetValue = if (focused) Dimens.focusElevation else 0.dp,
-        label = "playlist-lift",
-    )
-    val shape = RoundedCornerShape(Dimens.cardCorner)
-    Column(modifier = modifier.width(width), horizontalAlignment = Alignment.CenterHorizontally) {
-        TvClickable(
+    Column(modifier = modifier.width(width)) {
+        SquareArtTile(
+            coverArtId = playlist.coverArtId,
+            contentDescription = "${playlist.name} cover",
             onClick = onClick,
-            onFocusChanged = { focused = it },
-            modifier = Modifier
-                .fillMaxWidth()
-                .aspectRatio(1f)
-                .shadow(lift, shape, ambientColor = LiftAmbient, spotColor = LiftSpot),
-            shape = shape,
-        ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .clip(shape)
-                    .background(Brush.linearGradient(listOf(NavidromeColors.SurfaceVariant, NavidromeColors.Surface))),
-            ) {
-                Artwork(
-                    coverArtId = playlist.coverArtId,
-                    contentDescription = "${playlist.name} cover",
-                    modifier = Modifier.fillMaxSize(),
-                    shape = shape,
-                )
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(Brush.verticalGradient(listOf(Color.Transparent, Color(0x99000000)))),
-                )
-                Text(
-                    text = playlist.name,
-                    style = AppType.cardTitle,
-                    color = Color.White,
-                    maxLines = 3,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier
-                        .align(Alignment.BottomStart)
-                        .padding(Space.md),
-                )
-            }
-        }
-        Text(
-            text = Formatters.plural(playlist.trackCount, "song"),
-            style = AppType.cardSubtitle,
-            color = NavidromeColors.OnSurfaceMuted,
-            maxLines = 1,
-            textAlign = TextAlign.Center,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 8.dp),
+        )
+        TileCaption(
+            title = playlist.name,
+            subtitle = Formatters.plural(playlist.trackCount, "song"),
         )
     }
 }
 
 /**
- * Genre tile. Tiles use soft, fully saturated pastel washes (the one place the
- * chrome is allowed colour) so shelves of genres read like album-cover walls on a
- * light background.
+ * Genre tile: a saturated colour wash with the genre name in dark ink, which is
+ * the one place Apple Music lets a non-artwork surface carry colour.
  */
 @Composable
 fun GenreCard(
     genre: Genre,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    width: Dp = 300.dp,
+    width: Dp = 260.dp,
     colorIndex: Int = 0,
 ) {
     val gradients = listOf(
-        listOf(Color(0xFFFFE3CF), Color(0xFFF8C7A8)),
-        listOf(Color(0xFFDCEAFB), Color(0xFFBBD7F7)),
-        listOf(Color(0xFFE1F2E4), Color(0xFFC3E3CB)),
-        listOf(Color(0xFFF1E3F6), Color(0xFFDCC8EB)),
-        listOf(Color(0xFFFAEDE4), Color(0xFFEBD3C4)),
+        listOf(Color(0xFFFFC6A8), Color(0xFFF98A6B)),
+        listOf(Color(0xFFB7D9FF), Color(0xFF6FA8F5)),
+        listOf(Color(0xFFC8F0D2), Color(0xFF7FD69A)),
+        listOf(Color(0xFFE9CDF7), Color(0xFFBE93E8)),
+        listOf(Color(0xFFFFE7A8), Color(0xFFF5C74E)),
+        listOf(Color(0xFFFFC2CE), Color(0xFFF4718C)),
     )
     var focused by remember { mutableStateOf(false) }
     val lift by animateDpAsState(
@@ -352,15 +245,15 @@ fun GenreCard(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(112.dp)
+                .height(104.dp)
                 .background(Brush.linearGradient(colors), shape)
-                .padding(Space.lg),
+                .padding(Space.md),
             contentAlignment = Alignment.BottomStart,
         ) {
             Column {
                 Text(
                     text = genre.name,
-                    style = AppType.section,
+                    style = AppType.title,
                     color = NavidromeColors.Ink,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
@@ -368,7 +261,7 @@ fun GenreCard(
                 Text(
                     text = Formatters.plural(genre.albumCount, "album"),
                     style = AppType.cardSubtitle,
-                    color = NavidromeColors.Ink.copy(alpha = 0.62f),
+                    color = NavidromeColors.Ink.copy(alpha = 0.66f),
                 )
             }
         }
@@ -384,7 +277,7 @@ fun SkeletonTile(modifier: Modifier = Modifier, width: Dp = Space.cardArtwork) {
                 .fillMaxWidth()
                 .aspectRatio(1f)
                 .clip(RoundedCornerShape(Dimens.cardCorner))
-                .background(Color.White.copy(alpha = 0.45f)),
+                .background(Color.White.copy(alpha = 0.08f)),
         )
         Box(
             Modifier
@@ -392,7 +285,7 @@ fun SkeletonTile(modifier: Modifier = Modifier, width: Dp = Space.cardArtwork) {
                 .fillMaxWidth(0.7f)
                 .height(12.dp)
                 .clip(RoundedCornerShape(6.dp))
-                .background(Color.White.copy(alpha = 0.45f)),
+                .background(Color.White.copy(alpha = 0.08f)),
         )
     }
 }

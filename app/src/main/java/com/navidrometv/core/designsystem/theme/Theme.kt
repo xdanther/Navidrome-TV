@@ -15,64 +15,73 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.tv.material3.MaterialTheme
-import androidx.tv.material3.lightColorScheme
+import androidx.tv.material3.darkColorScheme
 
 /**
- * Colour roles for the light "ambient" look.
+ * Colour roles for the dark, artwork-led look Apple Music uses on Apple TV.
  *
- * The interface sits on a soft, warm-to-cool gradient instead of a flat dark
- * surface: text is near-black ink, cards are translucent white glass, and a single
- * system blue marks state (playing, active toggles, progress). Artwork supplies the
- * strong colour, so the chrome stays quiet.
+ * The canvas is black and the chrome is quiet: white type, a 60% white secondary
+ * label, hairline white borders and translucent dark glass for bars. Colour comes
+ * from the artwork; the one system tint (Apple Music red) only marks playback
+ * state and favourites.
  */
 object NavidromeColors {
-    /** Primary text and solid dark fills (buttons, dim overlays). */
-    val Ink = Color(0xFF16181C)
-    val Surface = Color(0xFFFFFFFF)
-    val SurfaceElevated = Color(0xFFFFFFFF)
+    /** Screen canvas. Apple Music on tvOS sits on black. */
+    val Background = Color(0xFF000000)
 
-    /** Low-contrast tint used for quiet fills on top of the light backdrop. */
-    val SurfaceVariant = Color(0x14000000)
-    val OnSurface = Color(0xFF16181C)
-    val OnSurfaceMuted = Color(0xFF64686F)
-    val Accent = Color(0xFF0A84FF)
-    val AccentMuted = Color(0xFFDCEAFE)
-    val Border = Color(0x1A000000)
-    val Scrim = Color(0x99000000)
+    /** Cards, sheets and panels. */
+    val Surface = Color(0xFF1C1C1E)
+    val SurfaceElevated = Color(0xFF2C2C2E)
+
+    /** Quiet fill on the dark canvas (icon discs, list rows, skeleton tiles). */
+    val SurfaceVariant = Color(0x1AFFFFFF)
+
+    /** Near-black used for text and glyphs on top of a white focused surface. */
+    val Ink = Color(0xFF0B0B0D)
+
+    val OnSurface = Color(0xFFFFFFFF)
+    val OnSurfaceMuted = Color(0xFFA1A1A8)
+    val Accent = Color(0xFFFA233B)
+    val AccentMuted = Color(0x33FA233B)
+    val Border = Color(0x24FFFFFF)
+    val Scrim = Color(0xCC000000)
 
     /** White fill for the focused element. */
     val Focus = Color(0xFFFFFFFF)
 
-    /** Outline drawn outside a focused element; must stay visible on light chrome. */
-    val FocusRing = Color(0xFF16181C)
+    /**
+     * Outer edge of the in-bounds focus ring. On a black canvas and over artwork a
+     * white band is enough on its own, so the edge stays a soft shadow.
+     */
+    val FocusRing = Color(0xE6000000)
 
-    /** Translucent white panels: navigation pill, mini player, quiet buttons. */
-    val Glass = Color(0xF2FFFFFF)
-    val GlassSubtle = Color(0x8CFFFFFF)
+    /** Translucent dark chrome: navigation bar, mini player, keyboard. */
+    val Glass = Color(0x99141416)
+    val GlassSubtle = Color(0x1FFFFFFF)
 
-    // Backdrop gradient stops (warm sand, cream, sage, sky). Every stop carries a
-    // visible tint: a near-white stop reads as a white margin at the screen edges.
-    val AmbientSand = Color(0xFFF2E3CB)
-    val AmbientCream = Color(0xFFF9F2E6)
-    val AmbientSage = Color(0xFFDCEADF)
-    val AmbientSky = Color(0xFFD6E3F1)
-    val AmbientMist = Color(0xFFE4EBF4)
+    // Backdrop stops. Deliberately near-black: the artwork should be the only
+    // bright thing on screen, so these read as depth, not as colour.
+    val AmbientSand = Color(0xFF17171B)
+    val AmbientCream = Color(0xFF121215)
+    val AmbientSage = Color(0xFF0E0E11)
+    val AmbientSky = Color(0xFF08080A)
+    val AmbientMist = Color(0xFF000000)
 }
 
-private val NavidromeLightColorScheme = lightColorScheme(
+private val NavidromeDarkColorScheme = darkColorScheme(
     primary = NavidromeColors.Accent,
     onPrimary = Color.White,
     primaryContainer = NavidromeColors.AccentMuted,
-    onPrimaryContainer = Color(0xFF0B3D7A),
-    secondary = NavidromeColors.Ink,
-    onSecondary = Color.White,
-    background = NavidromeColors.AmbientMist,
+    onPrimaryContainer = Color.White,
+    secondary = Color.White,
+    onSecondary = NavidromeColors.Ink,
+    background = NavidromeColors.Background,
     onBackground = NavidromeColors.OnSurface,
     surface = NavidromeColors.Surface,
     onSurface = NavidromeColors.OnSurface,
     surfaceVariant = NavidromeColors.SurfaceVariant,
     onSurfaceVariant = NavidromeColors.OnSurfaceMuted,
-    error = Color(0xFFB3261E),
+    error = Color(0xFFFF453A),
     onError = Color.White,
 )
 
@@ -82,18 +91,21 @@ data class AppColors(
     val cardScrim: Color = Color(0x00000000),
     val focusedBorder: Color = NavidromeColors.FocusRing,
     val secondaryText: Color = NavidromeColors.OnSurfaceMuted,
-    val divider: Color = Color(0x14000000),
-    val accentGradientStart: Color = Color(0xFF0A84FF),
-    val accentGradientEnd: Color = Color(0xFF4F9BFF),
-    val overlay: Color = Color(0x99000000),
+    val divider: Color = Color(0x1AFFFFFF),
+    val accentGradientStart: Color = NavidromeColors.Accent,
+    val accentGradientEnd: Color = Color(0xFFFF5A6E),
+    val overlay: Color = Color(0xCC000000),
 )
 
 val LocalAppColors = staticCompositionLocalOf { AppColors() }
 
 /**
- * TV type scale. Sizes follow the guidance that TV typography runs noticeably
- * larger than mobile, uses Roboto, and avoids thin weights. Section and page
- * titles are bold, matching how a media app labels shelves.
+ * TV type scale.
+ *
+ * Sizes are Apple's tvOS text styles halved, because a television reports about
+ * 960x540dp where Apple's layout canvas is 1920x1080pt: Title 2 (57pt) becomes
+ * 28sp, Title 3 (48pt) 24sp, Body (29pt) roughly 15sp, Caption 1 (25pt) 13sp.
+ * Shelf captions stay a step larger than Caption 1 so they read from across a room.
  */
 object AppType {
     private val Family = FontFamily.SansSerif
@@ -101,54 +113,54 @@ object AppType {
     val hero = TextStyle(
         fontFamily = Family,
         fontWeight = FontWeight.Bold,
-        fontSize = 48.sp,
-        lineHeight = 54.sp,
-        letterSpacing = (-0.8).sp,
+        fontSize = 44.sp,
+        lineHeight = 52.sp,
+        letterSpacing = (-0.6).sp,
     )
     val display = TextStyle(
         fontFamily = Family,
         fontWeight = FontWeight.Bold,
-        fontSize = 36.sp,
-        lineHeight = 44.sp,
+        fontSize = 34.sp,
+        lineHeight = 42.sp,
         letterSpacing = (-0.4).sp,
     )
     val title = TextStyle(
         fontFamily = Family,
-        fontWeight = FontWeight.Bold,
-        fontSize = 30.sp,
-        lineHeight = 38.sp,
+        fontWeight = FontWeight.SemiBold,
+        fontSize = 28.sp,
+        lineHeight = 34.sp,
         letterSpacing = (-0.3).sp,
     )
     val section = TextStyle(
         fontFamily = Family,
-        fontWeight = FontWeight.Bold,
-        fontSize = 24.sp,
-        lineHeight = 30.sp,
+        fontWeight = FontWeight.SemiBold,
+        fontSize = 22.sp,
+        lineHeight = 28.sp,
         letterSpacing = (-0.2).sp,
     )
     val cardTitle = TextStyle(
         fontFamily = Family,
-        fontWeight = FontWeight.SemiBold,
+        fontWeight = FontWeight.Medium,
         fontSize = 16.sp,
         lineHeight = 21.sp,
     )
     val cardSubtitle = TextStyle(
         fontFamily = Family,
         fontWeight = FontWeight.Normal,
-        fontSize = 13.sp,
-        lineHeight = 17.sp,
+        fontSize = 14.sp,
+        lineHeight = 19.sp,
     )
     val body = TextStyle(
         fontFamily = Family,
         fontWeight = FontWeight.Normal,
-        fontSize = 18.sp,
-        lineHeight = 26.sp,
+        fontSize = 17.sp,
+        lineHeight = 24.sp,
     )
     val bodyMuted = TextStyle(
         fontFamily = Family,
         fontWeight = FontWeight.Normal,
         fontSize = 16.sp,
-        lineHeight = 24.sp,
+        lineHeight = 23.sp,
     )
     val button = TextStyle(
         fontFamily = Family,
@@ -173,9 +185,10 @@ object AppType {
 }
 
 /**
- * Spacing grid. The horizontal and vertical screen margins are the overscan-safe
- * values from the TV layout guidance (48dp sides, 27dp top/bottom), so primary
- * content never sits in the region a television may crop.
+ * Spacing grid derived from Apple's tvOS safe area and layout grid, halved for
+ * this canvas: an 80pt side margin becomes 40dp, 60pt of top/bottom margin becomes
+ * 30dp, and the five-column grid (320pt items, 40pt gaps) becomes 160dp cards with
+ * 20dp gaps, which puts exactly five covers across a 960dp screen.
  */
 object Space {
     val xxs = 4.dp
@@ -185,69 +198,58 @@ object Space {
     val lg = 24.dp
     val xl = 32.dp
     val xxl = 48.dp
-    val screenHorizontal = 48.dp
-    val screenTop = 27.dp
+    val screenHorizontal = 40.dp
+    val screenTop = 30.dp
     val railWidth = 280.dp
-    val contentBottomWithPlayer = 136.dp
-    val cardWidth = 200.dp
-    val cardArtwork = 200.dp
-    val cardPoster = 176.dp
-    val rowSpacing = 24.dp
-    val topBarHeight = 72.dp
+    val contentBottomWithPlayer = 112.dp
+    val cardWidth = 160.dp
+    val cardArtwork = 160.dp
+    val cardPoster = 160.dp
+    val rowSpacing = 20.dp
+    val topBarHeight = 60.dp
 }
 
 object Dimens {
     val cardCorner = 6.dp
-    val panelCorner = 16.dp
+    val panelCorner = 14.dp
     val pillCorner = 100.dp
     val focusBorderWidth = 6.dp
     val cardElevation = 10.dp
-    val focusElevation = 22.dp
-    val floatingElevation = 20.dp
-    const val FOCUS_SCALE = 1.10f
+    val focusElevation = 20.dp
+    val floatingElevation = 16.dp
+    const val FOCUS_SCALE = 1.08f
 }
 
 /**
- * The ambient backdrop: one diagonal wash, warm sand at the top-left into cream,
- * sage and cool sky at the bottom-right, plus two soft colour blooms. It is drawn
- * once behind the whole app and covers the full canvas edge to edge, so no screen
- * ever shows a bare white margin around the content.
+ * The backdrop: a near-black vertical gradient with one soft glow at the top, so
+ * shelves sit on depth rather than on a flat black rectangle while artwork stays
+ * the brightest thing on screen. Drawn once behind the whole app, edge to edge.
  */
 @Composable
 fun AmbientBackdrop(modifier: Modifier = Modifier) {
     Canvas(modifier = modifier) {
         drawRect(
-            brush = Brush.linearGradient(
+            brush = Brush.verticalGradient(
                 colors = listOf(
                     NavidromeColors.AmbientSand,
                     NavidromeColors.AmbientCream,
                     NavidromeColors.AmbientSage,
                     NavidromeColors.AmbientSky,
+                    NavidromeColors.AmbientMist,
                 ),
-                start = Offset(0f, 0f),
-                end = Offset(size.width, size.height),
+                startY = 0f,
+                endY = size.height,
             ),
         )
-        // Warm bloom in the lower-left corner.
+        // Soft top glow, the same trick tvOS uses behind the navigation bar.
         drawRect(
             brush = Brush.radialGradient(
                 colors = listOf(
-                    NavidromeColors.AmbientSand.copy(alpha = 0.75f),
+                    Color(0x14FFFFFF),
                     Color.Transparent,
                 ),
-                center = Offset(size.width * 0.06f, size.height * 1.02f),
-                radius = size.width * 0.7f,
-            ),
-        )
-        // Cool bloom in the upper-right corner.
-        drawRect(
-            brush = Brush.radialGradient(
-                colors = listOf(
-                    NavidromeColors.AmbientSky.copy(alpha = 0.8f),
-                    Color.Transparent,
-                ),
-                center = Offset(size.width * 0.95f, size.height * -0.02f),
-                radius = size.width * 0.65f,
+                center = Offset(size.width * 0.5f, size.height * -0.05f),
+                radius = size.width * 0.8f,
             ),
         )
     }
@@ -256,7 +258,7 @@ fun AmbientBackdrop(modifier: Modifier = Modifier) {
 @Composable
 fun NavidromeTvTheme(content: @Composable () -> Unit) {
     CompositionLocalProvider(LocalAppColors provides AppColors()) {
-        MaterialTheme(colorScheme = NavidromeLightColorScheme) {
+        MaterialTheme(colorScheme = NavidromeDarkColorScheme) {
             content()
         }
     }

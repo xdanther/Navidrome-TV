@@ -152,16 +152,18 @@ fun ActionButton(
         modifier = modifier,
         shape = pill,
     ) { focused ->
+        // On the dark canvas a filled pill is white with black type; the secondary
+        // pill is a quiet white wash, and focus always resolves to the white fill.
         val background = when {
             !enabled -> NavidromeColors.SurfaceVariant
-            focused -> NavidromeColors.Surface
-            primary -> NavidromeColors.Ink
-            else -> NavidromeColors.GlassSubtle
+            focused -> Color.White
+            primary -> Color.White
+            else -> NavidromeColors.SurfaceVariant
         }
         val contentColor = when {
-            !enabled -> NavidromeColors.OnSurfaceMuted
+            !enabled -> NavidromeColors.OnSurfaceMuted.copy(alpha = 0.5f)
             focused -> NavidromeColors.Ink
-            primary -> Color.White
+            primary -> NavidromeColors.Ink
             else -> NavidromeColors.OnSurface
         }
         Row(
@@ -218,7 +220,7 @@ fun CircleIconButton(
     ) { focused ->
         val surface = when {
             !enabled -> background.copy(alpha = 0.35f)
-            focused -> NavidromeColors.Surface
+            focused -> Color.White
             else -> background
         }
         val iconTint = when {
@@ -269,8 +271,8 @@ fun FocusableRow(
             modifier = Modifier
                 .background(
                     when {
-                        focused -> Color.Black.copy(alpha = 0.09f)
-                        selected -> Color.Black.copy(alpha = 0.05f)
+                        focused -> Color.White.copy(alpha = 0.16f)
+                        selected -> Color.White.copy(alpha = 0.08f)
                         else -> Color.Transparent
                     },
                     shape,
@@ -310,8 +312,8 @@ fun FilterChip(
             modifier = Modifier
                 .background(
                     when {
-                        selected -> NavidromeColors.Ink
-                        focused -> NavidromeColors.Surface
+                        selected -> Color.White
+                        focused -> Color.White
                         else -> Color.Transparent
                     },
                     pill,
@@ -329,7 +331,7 @@ fun FilterChip(
                 text = label,
                 style = AppType.metadata,
                 color = when {
-                    selected -> Color.White
+                    selected -> NavidromeColors.Ink
                     focused -> NavidromeColors.Ink
                     else -> NavidromeColors.OnSurface
                 },
@@ -371,10 +373,10 @@ fun SectionHeader(
                 Text(
                     text = actionLabel,
                     style = AppType.metadata,
-                    color = if (focused) Color.White else NavidromeColors.OnSurfaceMuted,
+                    color = if (focused) NavidromeColors.Ink else NavidromeColors.OnSurfaceMuted,
                     modifier = Modifier
                         .background(
-                            if (focused) NavidromeColors.Ink else Color.Transparent,
+                            if (focused) Color.White else Color.Transparent,
                             RoundedCornerShape(Dimens.pillCorner),
                         )
                         .padding(horizontal = 14.dp, vertical = 6.dp),
