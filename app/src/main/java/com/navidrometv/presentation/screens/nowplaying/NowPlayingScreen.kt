@@ -26,6 +26,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material.icons.rounded.Favorite
 import androidx.compose.material.icons.rounded.FavoriteBorder
+import androidx.compose.material.icons.rounded.FormatQuote
 import androidx.compose.material.icons.rounded.KeyboardArrowDown
 import androidx.compose.material.icons.rounded.KeyboardArrowUp
 import androidx.compose.material.icons.rounded.Pause
@@ -50,6 +51,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
@@ -58,9 +60,11 @@ import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.LayoutDirection
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -70,10 +74,12 @@ import com.navidrometv.core.common.Formatters
 import com.navidrometv.core.designsystem.component.ActionButton
 import com.navidrometv.core.designsystem.component.Artwork
 import com.navidrometv.core.designsystem.component.CircleIconButton
+import com.navidrometv.core.designsystem.component.EqualizerIndicator
 import com.navidrometv.core.designsystem.component.InlineNotice
 import com.navidrometv.core.designsystem.component.SeekBar
 import com.navidrometv.core.designsystem.component.TvClickable
 import com.navidrometv.core.designsystem.theme.AppType
+import com.navidrometv.core.designsystem.theme.Dimens
 import com.navidrometv.core.designsystem.theme.NavidromeColors
 import com.navidrometv.core.designsystem.theme.Space
 import com.navidrometv.core.model.Lyrics
@@ -263,69 +269,85 @@ private fun NowPlayingContent(
     onOpenQueue: () -> Unit,
     onRetryLyrics: () -> Unit,
 ) {
-    BoxWithConstraints(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(horizontal = 64.dp, vertical = Space.lg),
-    ) {
-        // 240–400dp keeps the cover prominent without letting it become the screen.
-        val artworkSize = minOf(maxWidth * 0.34f, maxHeight * 0.58f).coerceIn(240.dp, 400.dp)
+    var showInfo by remember { mutableStateOf(false) }
+    var showLyrics by remember { mutableStateOf(false) }
 
-        Row(
-            modifier = Modifier.fillMaxSize(),
-            horizontalArrangement = Arrangement.spacedBy(56.dp),
-            verticalAlignment = Alignment.CenterVertically,
+    Box(Modifier.fillMaxSize()) {
+        BoxWithConstraints(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 64.dp, vertical = Space.lg),
         ) {
+            // One centred column sized from the screen, so cover, identity and
+            // transport always fit without scrolling.
+            val artworkSize = minOf(maxWidth * 0.34f, maxHeight * 0.46f).coerceIn(200.dp, 400.dp)
+            val coverShape = RoundedCornerShape(12.dp)
+
             Column(
-                modifier = Modifier.weight(0.9f),
+                modifier = Modifier.fillMaxSize(),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                Artwork(
-                    coverArtId = track.coverArtId,
-                    contentDescription = "${track.albumName ?: track.title} cover",
-                    modifier = Modifier.size(artworkSize),
-                    shape = RoundedCornerShape(22.dp),
-                    requestSizePx = 1000,
-                )
-                Text(
-                    text = track.title,
-                    style = AppType.title,
-                    color = Color.White,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.padding(top = Space.lg),
-                )
-                Text(
-                    text = track.artistName.orEmpty(),
-                    style = AppType.body,
-                    color = Color.White.copy(alpha = 0.78f),
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    textAlign = TextAlign.Center,
-                )
                 if (!track.albumName.isNullOrBlank()) {
                     Text(
                         text = track.albumName,
-                        style = AppType.bodyMuted,
-                        color = Color.White.copy(alpha = 0.55f),
+                        style = AppType.cardSubtitle,
+                        color = Color.White.copy(alpha = 0.62f),
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                         textAlign = TextAlign.Center,
                     )
                 }
-            }
 
-            Column(
-                modifier = Modifier
-                    .weight(1.1f)
-                    .fillMaxHeight(),
-                verticalArrangement = Arrangement.Center,
-            ) {
-                PlaybackProgress(
-                    positionMs = positionMs,
-                    durationMs = durationMs,
-                    onSeek = onSeek,
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxWidth(),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Artwork(
+                        coverArtId = track.coverArtId,
+                        contentDescription = "${track.albumName ?: track.title} cover",
+                        modifier = Modifier
+                            .size(artworkSize)
+                            .shadow(
+                                28.dp,
+                                coverShape,
+                                ambientColor = Color.Black.copy(alpha = 0.30f),
+                                spotColor = Color.Black.copy(alpha = 0.45f),
+                            ),
+                        shape = coverShape,
+                        requestSizePx = 1000,
+                    )
+                }
+
+                Row(
+                    modifier = Modifier.padding(top = Space.lg),
+                    horizontalArrangement = Arrangement.spacedBy(10.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    if (isPlaying) {
+                        EqualizerIndicator(
+                            playing = true,
+                            modifier = Modifier.size(width = 20.dp, height = 16.dp),
+                            color = Color.White.copy(alpha = 0.85f),
+                        )
+                    }
+                    Text(
+                        text = track.title,
+                        style = AppType.section.copy(fontWeight = FontWeight.Bold),
+                        color = Color.White,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        textAlign = TextAlign.Center,
+                    )
+                }
+                Text(
+                    text = track.artistName.orEmpty(),
+                    style = AppType.body,
+                    color = Color.White.copy(alpha = 0.62f),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    textAlign = TextAlign.Center,
                 )
 
                 Row(
@@ -339,34 +361,36 @@ private fun NowPlayingContent(
                         icon = Icons.Rounded.Shuffle,
                         contentDescription = "Shuffle",
                         onClick = onToggleShuffle,
-                        size = 52,
-                        tint = if (shuffle) NavidromeColors.Accent else Color.White,
-                        background = Color.White.copy(alpha = if (shuffle) 0.18f else 0.08f),
+                        size = 44,
+                        tint = if (shuffle) NavidromeColors.Accent else Color.White.copy(alpha = 0.72f),
+                        background = Color.Transparent,
                     )
                     CircleIconButton(
                         icon = Icons.Rounded.SkipPrevious,
                         contentDescription = "Previous",
                         onClick = onPrevious,
-                        size = 68,
-                        modifier = Modifier.padding(horizontal = Space.sm),
-                        background = Color.White.copy(alpha = 0.12f),
+                        size = 52,
+                        modifier = Modifier.padding(horizontal = Space.md),
+                        tint = Color.White.copy(alpha = 0.85f),
+                        background = Color.Transparent,
                     )
                     CircleIconButton(
                         icon = if (isPlaying) Icons.Rounded.Pause else Icons.Rounded.PlayArrow,
                         contentDescription = if (isPlaying) "Pause" else "Play",
                         onClick = onTogglePlay,
-                        size = 92,
+                        size = 76,
                         tint = NavidromeColors.Ink,
-                        background = Color.White,
+                        background = NavidromeColors.Surface,
                         modifier = Modifier.padding(horizontal = Space.xs),
                     )
                     CircleIconButton(
                         icon = Icons.Rounded.SkipNext,
                         contentDescription = "Next",
                         onClick = onNext,
-                        size = 68,
-                        modifier = Modifier.padding(horizontal = Space.sm),
-                        background = Color.White.copy(alpha = 0.12f),
+                        size = 52,
+                        modifier = Modifier.padding(horizontal = Space.md),
+                        tint = Color.White.copy(alpha = 0.85f),
+                        background = Color.Transparent,
                     )
                     CircleIconButton(
                         icon = when (repeatMode) {
@@ -375,56 +399,109 @@ private fun NowPlayingContent(
                         },
                         contentDescription = "Repeat",
                         onClick = onCycleRepeat,
-                        size = 52,
-                        tint = if (repeatMode == RepeatMode.OFF) Color.White else NavidromeColors.Accent,
-                        background = Color.White.copy(
-                            alpha = if (repeatMode == RepeatMode.OFF) 0.08f else 0.18f,
-                        ),
+                        size = 44,
+                        tint = if (repeatMode == RepeatMode.OFF) {
+                            Color.White.copy(alpha = 0.72f)
+                        } else {
+                            NavidromeColors.Accent
+                        },
+                        background = Color.Transparent,
                     )
+                }
+
+                PlaybackProgress(
+                    positionMs = positionMs,
+                    durationMs = durationMs,
+                    onSeek = onSeek,
+                )
+
+                if (showInfo) {
+                    AudioInfoPanel(track = track, info = audioInfo, quality = requestedQuality)
                 }
 
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(top = Space.sm),
-                    horizontalArrangement = Arrangement.Center,
+                    horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    CircleIconButton(
-                        icon = if (favorite) Icons.Rounded.Favorite else Icons.Rounded.FavoriteBorder,
-                        contentDescription = if (favorite) "Remove from favorites" else "Add to favorites",
-                        onClick = onToggleFavorite,
-                        size = 48,
-                        tint = if (favorite) NavidromeColors.Accent else Color.White,
-                        background = Color.White.copy(alpha = 0.08f),
-                    )
-                    CircleIconButton(
-                        icon = Icons.Rounded.QueueMusic,
-                        contentDescription = "Queue",
-                        onClick = onOpenQueue,
-                        size = 48,
-                        background = Color.White.copy(alpha = 0.08f),
-                        modifier = Modifier.padding(start = Space.xs),
-                    )
+                    TvClickable(
+                        onClick = { showInfo = !showInfo },
+                        shape = RoundedCornerShape(Dimens.pillCorner),
+                    ) { focused ->
+                        Text(
+                            text = "Info",
+                            style = AppType.button,
+                            color = if (focused) {
+                                NavidromeColors.Ink
+                            } else {
+                                Color.White.copy(alpha = 0.70f)
+                            },
+                            modifier = Modifier
+                                .background(
+                                    if (focused) NavidromeColors.Surface else Color.Transparent,
+                                    RoundedCornerShape(Dimens.pillCorner),
+                                )
+                                .padding(horizontal = 14.dp, vertical = 8.dp),
+                        )
+                    }
+                    Row(horizontalArrangement = Arrangement.spacedBy(Space.xxs)) {
+                        CircleIconButton(
+                            icon = if (favorite) Icons.Rounded.Favorite else Icons.Rounded.FavoriteBorder,
+                            contentDescription = if (favorite) {
+                                "Remove from favorites"
+                            } else {
+                                "Add to favorites"
+                            },
+                            onClick = onToggleFavorite,
+                            size = 44,
+                            tint = if (favorite) {
+                                NavidromeColors.Accent
+                            } else {
+                                Color.White.copy(alpha = 0.72f)
+                            },
+                            background = Color.Transparent,
+                        )
+                        CircleIconButton(
+                            icon = Icons.Rounded.FormatQuote,
+                            contentDescription = "Lyrics",
+                            onClick = { showLyrics = true },
+                            size = 44,
+                            tint = Color.White.copy(alpha = 0.72f),
+                            background = Color.Transparent,
+                        )
+                        CircleIconButton(
+                            icon = Icons.Rounded.QueueMusic,
+                            contentDescription = "Up next",
+                            onClick = onOpenQueue,
+                            size = 44,
+                            tint = Color.White.copy(alpha = 0.72f),
+                            background = Color.Transparent,
+                        )
+                    }
                 }
-
-                LyricsPanel(
-                    lyrics = lyrics,
-                    loading = lyricsLoading,
-                    unavailableReason = lyricsUnavailableReason,
-                    positionMs = positionMs,
-                    onRetry = onRetryLyrics,
-                )
-
-                AudioInfoPanel(track = track, info = audioInfo, quality = requestedQuality)
             }
+        }
+
+        if (showLyrics) {
+            LyricsOverlay(
+                track = track,
+                lyrics = lyrics,
+                loading = lyricsLoading,
+                unavailableReason = lyricsUnavailableReason,
+                positionMs = positionMs,
+                onRetry = onRetryLyrics,
+                onClose = { showLyrics = false },
+            )
         }
     }
 }
 
 /**
  * Progress bar isolated behind a lambda provider: the position ticks invalidate
- * only this composable, never the artwork or the background behind it.
+ * only this composable, never the artwork or the background behind it. On the dark
+ * player it is a white bar with the elapsed and remaining times beneath it.
  */
 @Composable
 private fun PlaybackProgress(
@@ -432,7 +509,222 @@ private fun PlaybackProgress(
     durationMs: Long,
     onSeek: (Long) -> Unit,
 ) {
-    SeekBar(positionMs = positionMs(), durationMs = durationMs, onSeek = onSeek)
+    SeekBar(
+        positionMs = positionMs(),
+        durationMs = durationMs,
+        onSeek = onSeek,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = Space.xs),
+        labelsBelow = true,
+        filledColor = Color.White,
+        trackColor = Color.White.copy(alpha = 0.26f),
+        labelColor = Color.White.copy(alpha = 0.55f),
+    )
+}
+
+/**
+ * Full-screen lyrics view: cover on the left, the active line large on the right,
+ * and the track's identity in a translucent card underneath, matching the layout
+ * of the reference player's lyrics page.
+ */
+@Composable
+private fun LyricsOverlay(
+    track: Track,
+    lyrics: Lyrics?,
+    loading: Boolean,
+    unavailableReason: String?,
+    positionMs: () -> Long,
+    onRetry: () -> Unit,
+    onClose: () -> Unit,
+) {
+    BackHandler(onBack = onClose)
+    BoxWithConstraints(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.Black.copy(alpha = 0.62f)),
+    ) {
+        val coverSize = minOf(maxWidth * 0.26f, maxHeight * 0.54f).coerceIn(180.dp, 340.dp)
+        val shape = RoundedCornerShape(12.dp)
+        Row(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 72.dp, vertical = Space.xl),
+            horizontalArrangement = Arrangement.spacedBy(56.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Artwork(
+                coverArtId = track.coverArtId,
+                contentDescription = null,
+                modifier = Modifier
+                    .size(coverSize)
+                    .shadow(
+                        26.dp,
+                        shape,
+                        ambientColor = Color.Black.copy(alpha = 0.30f),
+                        spotColor = Color.Black.copy(alpha = 0.45f),
+                    ),
+                shape = shape,
+                requestSizePx = 800,
+            )
+            Column(modifier = Modifier.weight(1f)) {
+                when {
+                    loading -> Text(
+                        text = "Looking for lyrics…",
+                        style = AppType.section,
+                        color = Color.White.copy(alpha = 0.55f),
+                    )
+                    lyrics == null -> {
+                        Text(
+                            text = unavailableReason ?: "No lyrics available",
+                            style = AppType.section,
+                            color = Color.White.copy(alpha = 0.55f),
+                            maxLines = 3,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+                        ActionButton(
+                            text = "Retry",
+                            onClick = onRetry,
+                            primary = false,
+                            modifier = Modifier.padding(top = Space.md),
+                        )
+                    }
+                    lyrics.synced -> SyncedLyricFocus(lyrics = lyrics, positionMs = positionMs)
+                    else -> PlainLyricFocus(lyrics = lyrics)
+                }
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = Space.xl)
+                        .background(Color.White.copy(alpha = 0.10f), RoundedCornerShape(16.dp))
+                        .padding(Space.md),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(Space.md),
+                ) {
+                    Artwork(
+                        coverArtId = track.coverArtId,
+                        contentDescription = null,
+                        modifier = Modifier.size(56.dp),
+                        shape = RoundedCornerShape(6.dp),
+                        requestSizePx = 240,
+                    )
+                    Column(Modifier.weight(1f)) {
+                        Text(
+                            text = track.title,
+                            style = AppType.cardTitle,
+                            color = Color.White,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+                        Text(
+                            text = listOfNotNull(track.artistName, track.albumName).joinToString(" — "),
+                            style = AppType.cardSubtitle,
+                            color = Color.White.copy(alpha = 0.60f),
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+                    }
+                    if (track.hasDuration) {
+                        Text(
+                            text = Formatters.duration(track.durationMs),
+                            style = AppType.metadata,
+                            color = Color.White.copy(alpha = 0.60f),
+                        )
+                    }
+                }
+            }
+        }
+        Text(
+            text = "Press BACK to close",
+            style = AppType.cardSubtitle,
+            color = Color.White.copy(alpha = 0.38f),
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(Space.lg),
+        )
+    }
+}
+
+/** Current lyric line at display size, with the next two lines fading out below. */
+@Composable
+private fun SyncedLyricFocus(lyrics: Lyrics, positionMs: () -> Long) {
+    val index by remember(lyrics) {
+        derivedStateOf { lyrics.lines.indexOfLast { (it.startMs ?: 0L) <= positionMs() } }
+    }
+    val current = lyrics.lines.getOrNull(index)?.text
+    val next = lyrics.lines.getOrNull(index + 1)?.text
+    val after = lyrics.lines.getOrNull(index + 2)?.text
+
+    Column {
+        LyricLine(
+            text = current.orEmpty(),
+            fontSize = 34.sp,
+            color = Color.White,
+            weight = FontWeight.Bold,
+        )
+        if (!next.isNullOrBlank()) {
+            LyricLine(
+                text = next,
+                fontSize = 26.sp,
+                color = Color.White.copy(alpha = 0.45f),
+                weight = FontWeight.Medium,
+                modifier = Modifier.padding(top = Space.sm),
+            )
+        }
+        if (!after.isNullOrBlank()) {
+            LyricLine(
+                text = after,
+                fontSize = 26.sp,
+                color = Color.White.copy(alpha = 0.24f),
+                weight = FontWeight.Normal,
+                modifier = Modifier.padding(top = Space.xs),
+            )
+        }
+    }
+}
+
+@Composable
+private fun PlainLyricFocus(lyrics: Lyrics) {
+    val body = remember(lyrics) { lyrics.lines.take(8).joinToString("\n") { it.text } }
+    LyricLine(
+        text = body,
+        fontSize = 24.sp,
+        color = Color.White.copy(alpha = 0.85f),
+        weight = FontWeight.Normal,
+        maxLines = 8,
+    )
+}
+
+/**
+ * One lyric line, laid out right-to-left when the line starts with a right-to-left
+ * script so Arabic and Hebrew shape and align correctly.
+ */
+@Composable
+private fun LyricLine(
+    text: String,
+    fontSize: TextUnit,
+    color: Color,
+    weight: FontWeight,
+    modifier: Modifier = Modifier,
+    maxLines: Int = 2,
+) {
+    val rtl = remember(text) { isRightToLeft(text) }
+    CompositionLocalProvider(
+        LocalLayoutDirection provides if (rtl) LayoutDirection.Rtl else LayoutDirection.Ltr,
+    ) {
+        Text(
+            text = text,
+            style = AppType.section.copy(
+                fontSize = fontSize,
+                fontWeight = weight,
+                lineHeight = fontSize * 1.25f,
+            ),
+            color = color,
+            maxLines = maxLines,
+            overflow = TextOverflow.Ellipsis,
+            modifier = modifier.fillMaxWidth(),
+        )
+    }
 }
 
 @Composable
@@ -461,43 +753,50 @@ private fun PlaybackBackground(
                         .fillMaxSize()
                         // Slight overscan hides the transparent edge a large blur leaves.
                         .graphicsLayer {
-                            scaleX = 1.18f
-                            scaleY = 1.18f
+                            scaleX = 1.25f
+                            scaleY = 1.25f
                         }
                         .then(
                             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                                Modifier.blur(80.dp)
+                                Modifier.blur(90.dp)
                             } else {
                                 Modifier
                             },
                         ),
                     shape = RoundedCornerShape(0.dp),
-                    requestSizePx = 640,
+                    requestSizePx = 480,
                     showFallbackIcon = false,
                 )
             } else {
                 Box(Modifier.fillMaxSize())
             }
         }
+        // The blurred cover stays one continuous colour surface, tinted by the
+        // artwork's own palette, instead of being washed out to near-black.
         Box(
             Modifier
                 .fillMaxSize()
                 .background(
                     Brush.verticalGradient(
                         listOf(
-                            colors.background.copy(alpha = 0.72f),
-                            Color(0xF20E0F11),
-                            Color(0xFF0E0F11),
+                            colors.dominant.copy(alpha = 0.28f),
+                            Color.Transparent,
+                            colors.background.copy(alpha = 0.35f),
                         ),
                     ),
                 ),
         )
+        // Only enough darkening at the bottom for the transport and times to read.
         Box(
             Modifier
                 .fillMaxSize()
                 .background(
-                    Brush.horizontalGradient(
-                        listOf(Color(0x99000000), Color(0x22000000), Color(0x99000000)),
+                    Brush.verticalGradient(
+                        listOf(
+                            Color.Black.copy(alpha = 0.05f),
+                            Color.Transparent,
+                            Color.Black.copy(alpha = 0.30f),
+                        ),
                     ),
                 ),
         )

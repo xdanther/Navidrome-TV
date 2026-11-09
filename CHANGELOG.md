@@ -25,6 +25,14 @@ All notable changes to this project are documented here. The format follows
 
 ### Changed
 
+- Now Playing is a single centred column like the reference player: album name at
+  the top, a large square cover with a soft shadow, the track title with a playing
+  indicator beside it, then a quiet transport row whose controls are transparent
+  discs until they take focus, a white progress bar with the times beneath it, and
+  an Info / favourite / lyrics / up-next bar along the bottom. The backdrop keeps
+  the blurred cover as artwork-tinted colour instead of washing it to near-black,
+  and lyrics moved into a full-screen overlay with the active line large and the
+  next two fading out, plus a translucent card carrying the track's identity.
 - Media cards follow the reference shelf: a 2:3 editorial poster card carries its
   title in a solid footer band inside the artwork with an eyebrow label above it,
   and the square album, artist and playlist cards now use a centred two-line

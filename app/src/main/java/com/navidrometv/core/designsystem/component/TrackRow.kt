@@ -144,7 +144,11 @@ fun TrackRow(
  * (and OLED power draw) low.
  */
 @Composable
-fun EqualizerIndicator(playing: Boolean, modifier: Modifier = Modifier) {
+fun EqualizerIndicator(
+    playing: Boolean,
+    modifier: Modifier = Modifier,
+    color: Color = NavidromeColors.Accent,
+) {
     val transition = rememberInfiniteTransition(label = "equalizer")
 
     val barOne by transition.animateFloat(
@@ -179,7 +183,7 @@ fun EqualizerIndicator(playing: Boolean, modifier: Modifier = Modifier) {
                     .width(3.dp)
                     .height((value.coerceIn(0.15f, 1f) * 18f).dp)
                     .clip(RoundedCornerShape(2.dp))
-                    .background(NavidromeColors.Accent),
+                    .background(color),
             )
             if (index == heights.lastIndex) Unit
         }
