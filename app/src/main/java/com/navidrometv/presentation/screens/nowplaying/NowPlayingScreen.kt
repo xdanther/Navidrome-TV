@@ -276,11 +276,11 @@ private fun NowPlayingContent(
         BoxWithConstraints(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(horizontal = 64.dp, vertical = Space.lg),
+                .padding(horizontal = 64.dp, vertical = Space.md),
         ) {
             // One centred column sized from the screen, so cover, identity and
             // transport always fit without scrolling.
-            val artworkSize = minOf(maxWidth * 0.34f, maxHeight * 0.46f).coerceIn(200.dp, 400.dp)
+            val artworkSize = minOf(maxWidth * 0.38f, maxHeight * 0.50f).coerceIn(220.dp, 420.dp)
             val coverShape = RoundedCornerShape(12.dp)
 
             Column(
@@ -321,7 +321,7 @@ private fun NowPlayingContent(
                 }
 
                 Row(
-                    modifier = Modifier.padding(top = Space.lg),
+                    modifier = Modifier.padding(top = Space.sm),
                     horizontalArrangement = Arrangement.spacedBy(10.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
@@ -353,7 +353,7 @@ private fun NowPlayingContent(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(top = Space.md),
+                        .padding(top = Space.sm),
                     horizontalArrangement = Arrangement.Center,
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
@@ -422,7 +422,7 @@ private fun NowPlayingContent(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(top = Space.sm),
+                        .padding(top = Space.xs),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
@@ -793,9 +793,9 @@ private fun PlaybackBackground(
                 .background(
                     Brush.verticalGradient(
                         listOf(
-                            Color.Black.copy(alpha = 0.05f),
+                            Color.Black.copy(alpha = 0.12f),
                             Color.Transparent,
-                            Color.Black.copy(alpha = 0.30f),
+                            Color.Black.copy(alpha = 0.45f),
                         ),
                     ),
                 ),

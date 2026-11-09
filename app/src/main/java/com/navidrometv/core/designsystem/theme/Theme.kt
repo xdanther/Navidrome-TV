@@ -191,7 +191,7 @@ object Space {
     val contentBottomWithPlayer = 136.dp
     val cardWidth = 200.dp
     val cardArtwork = 200.dp
-    val cardPoster = 204.dp
+    val cardPoster = 176.dp
     val rowSpacing = 24.dp
     val topBarHeight = 72.dp
 }

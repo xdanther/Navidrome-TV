@@ -90,21 +90,17 @@ private fun HomeContent(
             top = Space.md,
             bottom = Space.contentBottomWithPlayer,
         ),
-        verticalArrangement = Arrangement.spacedBy(Space.lg),
+        verticalArrangement = Arrangement.spacedBy(Space.md),
     ) {
+        // One compact line above the first shelf instead of a hero block: the
+        // reference page starts on its first heading, not on a greeting wall.
         item(key = "greeting") {
-            Column(modifier = Modifier.padding(horizontal = Space.screenHorizontal)) {
-                Text(
-                    text = greeting(),
-                    style = AppType.title,
-                    color = NavidromeColors.OnSurface,
-                )
-                Text(
-                    text = if (state.hasHistory) "Picked up from your listening history" else "Fresh from your server",
-                    style = AppType.bodyMuted,
-                    color = NavidromeColors.OnSurfaceMuted,
-                )
-            }
+            Text(
+                text = greeting(),
+                style = AppType.section,
+                color = NavidromeColors.OnSurfaceMuted,
+                modifier = Modifier.padding(horizontal = Space.screenHorizontal),
+            )
         }
 
         if (state.discover.isNotEmpty()) {

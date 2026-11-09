@@ -160,9 +160,9 @@ fun GenreRow(
 /** Headers stay on the overscan-safe margin; the carousel may bleed past it. */
 private fun rowHeaderModifier(bleed: Boolean): Modifier =
     if (bleed) {
-        Modifier.padding(start = Space.screenHorizontal, bottom = Space.sm)
+        Modifier.padding(start = Space.screenHorizontal, bottom = Space.xs)
     } else {
-        Modifier.padding(bottom = Space.sm)
+        Modifier.padding(bottom = Space.xs)
     }
 
 /**
@@ -181,7 +181,7 @@ private fun RowCarousel(
     LazyRow(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(spacing),
-        contentPadding = PaddingValues(start = side, end = side, top = 18.dp, bottom = 18.dp),
+        contentPadding = PaddingValues(start = side, end = side, top = 8.dp, bottom = 8.dp),
         content = content,
     )
 }
